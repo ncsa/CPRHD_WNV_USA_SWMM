@@ -10,7 +10,6 @@ def process_input(file):
     #  Postconditions: The SWMM model has created a .out and .rpt file in the base_directory\data folder based on the parameters given in the .inp file.
     with Simulation(file) as sim:
         sim.execute()
-        sim.report()
         sim.close()
 
 
