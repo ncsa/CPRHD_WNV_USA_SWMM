@@ -5,6 +5,6 @@ with open('./data/input_data/group_characteristics/Selected_BG_inputs_20180208.c
     reader = csv.reader(characteristics_file)
     next(reader)  # Skip the first line of the .csv as it contains headers
     for line in reader:
-        print(fips_converter.fips_conversion(line[0]))
+        print(fips_converter.fips_conversion(line[0]))  # line[0] represents the first column, the GEOID
 
 
