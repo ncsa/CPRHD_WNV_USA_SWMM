@@ -16,6 +16,8 @@ This module moves all .rpt files from ./data to ./data/report_files. Make sure t
 ### [fips_converter.py](https://github.com/mataslauzadis/SWMM/blob/master/fips_converter.py)
 This module converts 12-digit GEOID codes to State and County names. It also provides a dictionary containing each state / county code pair.
     
+    Sample input: 
+    170438466033
     Sample output:
     ['Illinois', 'Du Page', '8466', '033']
 
