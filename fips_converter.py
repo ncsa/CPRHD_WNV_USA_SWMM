@@ -18,22 +18,22 @@ def fips_to_dict():
                       .split(',')
             #exec('tup = (' + line + ')') # Alternative to .replace and .split
 
-            # tup = (Alabama,Baldwin,01,003) # Example tuple
+            # tup = (Alabama,Baldwin,01,003) # Example tuple after processing
             state_name = tup[0]
             county_name = tup[1]
             state_id = tup[2]
             county_id = tup[3]
 
-            if state_id not in data:
-                data[state_id] = {}
-            if county_id not in data[state_id]:
-                data[state_id][county_id] = [state_name, county_name]
+            if state_id not in data:   # If the state is not already in the dictionary
+                data[state_id] = {}  # Add the state
+            if county_id not in data[state_id]:  # If the county is not in the state subset
+                data[state_id][county_id] = [state_name, county_name]  # Add the county, and associate it with the names of both
             line = file.readline()
     return data
 
 
 def fips_conversion(fips_code):
-    #Preconditions: A 12-digit GeoID has been passed (State (2) + County (3) + Tract (4) + Block Group (3))
+    #Preconditions: A 12-digit GeoID has been passed (State (2 digits) + County (3 digits) + Tract (4 digits) + Block Group (3 digits))
     #Postconditoins: A list has been returned with the format of [State name, County name, Tract ID, Block Group ID]
 
     state_code = fips_code[:2]
