@@ -1,6 +1,8 @@
 def fips_to_dict():
     #Preconditions: None
     #Postconditions: A dictionary with keys of state code and county code has been returned.
+    #                ex. dict[state_code][county_code] will give you the state name and county name
+  
 
     data = {}  # Create an empty dictionary that we will fill later
 
