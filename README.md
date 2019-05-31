@@ -21,7 +21,7 @@ This module converts 12-digit GEOID codes to State and County names. It also pro
     Sample output:
     ['Illinois', 'Du Page', '8466', '033']
     
-###[create_input_file.py](https://github.com/mataslauzadis/SWMM/blob/master/create_input_file.py)
+ ###[create_input_file.py](https://github.com/mataslauzadis/SWMM/blob/master/create_input_file.py)
 This module creates an input file for the SWMM Model.
 
 
