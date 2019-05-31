@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "1e51e23f0ede2ac33b2c3621e872618bb2cb5ff003ad01d99d9a5a6b88bde84a"
+            "sha256": "1ecce295f3278049878584af306ea61f1687b09dcfb5e844c8f6b0cef694a37e"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -103,6 +103,13 @@
             ],
             "version": "==1.1.0"
         },
+        "jellyfish": {
+            "hashes": [
+                "sha256:887a9a49d0caee913a883c3e7eb185f6260ebe2137562365be422d1316bd39c9",
+                "sha256:d0b22034df56d5faa34928457655722acf385d122da59c2cf7f4acd6bd49ea8b"
+            ],
+            "version": "==0.5.6"
+        },
         "jinja2": {
             "hashes": [
                 "sha256:065c4f02ebe7f7cf559e49ee5a95fb800a9e4528727aec6f24402a5374c65013",
@@ -195,7 +202,6 @@
                 "sha256:e7d6620d145ca9f6c3e88248e5734b6fda430e75e70755b887e48f8e9bc1de2a",
                 "sha256:f3d8b6bccc577e4e5ecbd58fdd63cacb8e58f0ed1e97616a7f7a7baaf4b8d036"
             ],
-            "markers": "python_version >= '3.5'",
             "version": "==3.1.0"
         },
         "numpy": {
@@ -428,9 +434,9 @@
         },
         "tstoolbox": {
             "hashes": [
-                "sha256:62fffbd7721c6ff2fdb138ca3982112f03057e0a51784ad755f3f0be8394313a"
+                "sha256:a7b6069178be0f2e4339a93d7d7f6fdbc5b05739c739d68b250476988f246a3a"
             ],
-            "version": "==32.81.37.25"
+            "version": "==34.83.39.27"
         },
         "tzlocal": {
             "hashes": [
@@ -444,6 +450,13 @@
                 "sha256:dbe59173209418ae49d485b87d1681aefa36252ee85884c31346debd19463232"
             ],
             "version": "==1.25.3"
+        },
+        "us": {
+            "hashes": [
+                "sha256:09dc9ba763e2e4399e6a042104f3e415a7de6bfa4df6f557b4f19e3ba9a22fda"
+            ],
+            "index": "pypi",
+            "version": "==1.0.0"
         },
         "xlsxwriter": {
             "hashes": [

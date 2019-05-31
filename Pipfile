@@ -8,6 +8,7 @@ verify_ssl = true
 [packages]
 pyswmm = "*"
 swmmtoolbox = "*"
+us = "*"
 
 [requires]
 python_version = "3.7"

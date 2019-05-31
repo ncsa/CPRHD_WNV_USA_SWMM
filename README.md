@@ -13,4 +13,10 @@ Make sure your file path is set up such that the .inp files are in ./data. There
 ### [move_report_files.py](https://github.com/mataslauzadis/SWMM/blob/master/move_report_files.py)
 This module moves all .rpt files from ./data to ./data/report_files. Make sure the path exists before trying to run this.
 
+### fips_converter.py
+This module converts 12-digit GEOID codes to State and County names. It also provides a dictionary containing each state / county code pair.
+    
+    Sample output:
+    ['Illinois', 'Du Page', '8466', '033']
+
 
