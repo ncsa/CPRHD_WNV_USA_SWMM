@@ -6,10 +6,10 @@ import os  # Used to delete the .out file after it has been read into a .csv (sa
 from extract_data import process_output
 
 
-def process_input(file):
+def process_input(input_file):
     #  Preconditions: 'file' has been passed, containing the directory path for a .inp file
     #  Postconditions: The SWMM model has created a .out and .rpt file in the base_directory\data folder based on the parameters given in the .inp file.
-    with Simulation(file) as sim:
+    with Simulation(input_file) as sim:
         sim.execute()
         sim.close()
     print()
@@ -25,7 +25,7 @@ for file in input_files:  # Loop through all input files
     #  Extract data to .csv
     output_file = glob.glob('.\data\*.out')[0]  # Since glob returns a list of files, we get the first (and only) file with [0].
     process_output(output_file)
-    print('\nWriting data from', output_file, 'to .\\data\\binary_csv' + file[6:-4] + '.csv')
+    print('Writing data from', output_file, 'to .\\data\\binary_csv' + file[6:-4] + '.csv')
 
     #  Remove .out file
     os.remove(output_file)
