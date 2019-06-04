@@ -45,4 +45,4 @@ def fips_conversion(fips_code):
     return [converted_fips[0], converted_fips[1], census_tract, census_block_group]
 
 
-_fips_dict = fips_to_dict()
+_fips_dict = fips_to_dict()  # Create the dictionary for use in fips_conversion
