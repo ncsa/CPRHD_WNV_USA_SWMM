@@ -17,7 +17,7 @@ def process_output(output_file):
             new_data = swmmtoolbox.extract(output_file, input_parameter)
             all_dataframe = all_dataframe.join(new_data)  # Add a new column to the dataframe
 
-    filename = '.\\data\\binary_csv' + output_file[6:-4] + '.csv'  # Make a pretty .csv file name
+    filename = './data/binary_csv' + output_file[6:-4] + '.csv'  # Make a pretty .csv file name
     with open(filename, 'w') as file:
         pd.DataFrame.to_csv(all_dataframe, file)  # Write the data-frame to a .csv file
 

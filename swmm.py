@@ -23,6 +23,7 @@ def complete_process(input_file):
 
     print('Processing', input_file[7:], ' Thread:', os.getpid())  # Print filename and thread number
     process_input(input_file)
+
     output_file = input_file[:-4] + '.out'  # Name formatting
     process_output(output_file)  # Create the .csv from the .out file
     os.remove(output_file)  # Remove the .out file
@@ -41,13 +42,8 @@ def suppressOutput(func):  # This function temporarily redirects stdout to a nul
 if __name__ == '__main__':
     start_time = time.time()
 
-    input_files = glob.glob('.\data\*.inp')
+    input_files = glob.glob('./data/*.inp')
     pool = Pool()
     pool.map(complete_process, input_files)
 
     print('Elapsed time:', time.time() - start_time)
-
-
-
-
-
