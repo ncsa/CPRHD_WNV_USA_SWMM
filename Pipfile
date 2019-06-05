@@ -8,4 +8,3 @@ verify_ssl = true
 [packages]
 pyswmm = "*"
 swmmtoolbox = "*"
-us = "*"
