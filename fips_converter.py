@@ -7,10 +7,7 @@ def fips_to_dict():
     data = {}  # Create an empty dictionary that we will fill later
 
     with open('US_FIPS_Codes.csv') as file:
-        line = file.readline()
-    
-        while line:  # Loop through the file
-
+        for line in file:
             # Remove quotes and new line characters
             tup = line.replace('"', '')\
                       .replace('\n','')\
@@ -28,7 +25,6 @@ def fips_to_dict():
                 data[state_id] = {}  # Add the state
             if county_id not in data[state_id]:  # If the county is not in the state subset
                 data[state_id][county_id] = [state_name, county_name]  # Add the county, and associate it with the names of both
-            line = file.readline()
     return data
 
 
