@@ -24,7 +24,7 @@ def complete_process(input_file):
 
     output_file = input_file[:-4] + '.out'  # Name formatting
     process_output(output_file)  # Create the .csv from the .out file
-    #os.remove(output_file)  # Remove the .out file
+    os.remove(output_file)  # Remove the .out file
 
 
 def suppressOutput(func):  # This function temporarily redirects stdout to a null variable so it doesn't get printed
