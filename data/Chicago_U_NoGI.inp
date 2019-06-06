@@ -2,8 +2,8 @@
 ;; 060372240202	Chicago-urban	No GI
 
 [OPTIONS]
-;;Option             Value
-FLOW_UNITS           CFS
+;;Option    	     Value
+FLOW_UNITS	CFS
 INFILTRATION         GREEN_AMPT
 FLOW_ROUTING         KINWAVE
 LINK_OFFSETS         DEPTH
