@@ -6,8 +6,8 @@ Project_base
 |   swmm.py
 |   create_input_file.py
 |   extract_data.py
-|   move_report_files.py
 |   US_FIPS_Codes.csv
+|   move_report_files.py
 └── data
      └─── binary_csv
           | .csv files
@@ -21,9 +21,9 @@ Project_base
 ```
 
 #### Legend: 
-   #####File: | 
+   File: | 
    
-   #####Folder: └───
+   Folder: └───
    
 ## Main Modules
 ### [swmm.py](https://github.com/mataslauzadis/SWMM/blob/master/swmm.py)
