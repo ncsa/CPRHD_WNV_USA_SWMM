@@ -1,4 +1,24 @@
 # SWMM
+## Directory Setup
+```
+Project_base
+|   README.md
+|   swmm.py
+|   create_input_file.py
+|   extract_data.py
+|   move_report_files.py
+|   US_FIPS_Codes.csv
+└── data
+     └─── binary_csv
+          | .csv files
+     └─── input_file_data
+          | PRISM_selectBG_dailyrain_raw_in_20170917.csv (Weather data)
+          | Selected_BG_inputs_20180208.csv (Group characteristics)
+     └─── input_files
+          | .inp files created by create_input_file.py
+     └─── report_files
+          | .rpt files
+```
 ## Main Modules
 ### [swmm.py](https://github.com/mataslauzadis/SWMM/blob/master/swmm.py)
 Using [pyswmm](https://github.com/OpenWaterAnalytics/pyswmm), this module converts .inp files to .out and .rpt files, then, using [swmmtoolbox](https://github.com/timcera/swmmtoolbox), extracts the data from the binary .out file and stores it in a .csv file.
