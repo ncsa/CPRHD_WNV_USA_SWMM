@@ -10,12 +10,12 @@ Project_base
 |   move_report_files.py
 └── data
      └─── binary_csv
-          | .csv files
+     |    | .csv files
      └─── input_file_data
-          | PRISM_selectBG_dailyrain_raw_in_20170917.csv (Weather data)
-          | Selected_BG_inputs_20180208.csv (Group characteristics)
+     |    | PRISM_selectBG_dailyrain_raw_in_20170917.csv (Weather data)
+     |    | Selected_BG_inputs_20180208.csv (Group characteristics data)
      └─── input_files
-          | .inp files created by create_input_file.py
+     |    | .inp files
      └─── report_files
           | .rpt files
 ```
