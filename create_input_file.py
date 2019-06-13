@@ -47,7 +47,7 @@ def create_input_file(row):
         timeSeriesString = '[TIMESERIES]\n;;Name\tDate\tTime\tValue\n'  # Timeseries header
         timeSeriesString += ';;--------------------------------------------\n'
 
-        with open('./data/input_file_data/rows/' + row['PRISM_ID'] + '.csv', 'r', newline='') as weather_file:
+        with open('./data/input_file_data/weather_data/' + row['PRISM_ID'] + '.csv', 'r', newline='') as weather_file:
             reader = csv.reader(weather_file)
             start_date_compare = start_date[-4:] + '-' + start_date[:2] + '-' + start_date[3:5]  # Convert to YYYY-MM-DD (for <=, >= support)
             end_date_compare = end_date[-4:] + '-' + end_date[:2] + '-' + end_date[3:5]  # Convert to YYYY-MM-DD

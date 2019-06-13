@@ -3,6 +3,7 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/data/input_file_data/rows" />
+      <excludeFolder url="file://$MODULE_DIR$/data/input_file_data/weather_data" />
       <excludeFolder url="file://$MODULE_DIR$/data/input_files" />
     </content>
     <orderEntry type="jdk" jdkName="Pipenv (SWMM)" jdkType="Python SDK" />

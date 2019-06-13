@@ -44,6 +44,8 @@ if __name__ == '__main__':
     pool = Pool()
     pool.map(complete_process, input_files)
     print('Elapsed time with multi-threading:', '%.2f' % (time.time() - start_time), 'seconds.')
+
+    # # Single thread test
     # start_time = time.time()
     # for file in input_files:
     #     complete_process(file)
