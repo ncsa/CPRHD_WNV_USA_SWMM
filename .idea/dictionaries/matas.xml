@@ -5,7 +5,11 @@
       <w>fips</w>
       <w>geoid</w>
       <w>postconditions</w>
+      <w>raingage</w>
+      <w>subcatch</w>
+      <w>subcatchment</w>
       <w>swmm</w>
+      <w>timeseries</w>
     </words>
   </dictionary>
 </component>
