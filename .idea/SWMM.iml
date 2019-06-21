@@ -6,7 +6,7 @@
       <excludeFolder url="file://$MODULE_DIR$/data/input_file_data/weather_data" />
       <excludeFolder url="file://$MODULE_DIR$/data/input_files" />
     </content>
-    <orderEntry type="jdk" jdkName="Pipenv (SWMM)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.7 (SWMM)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="R User Library" level="project" />
     <orderEntry type="library" name="R Skeletons" level="application" />

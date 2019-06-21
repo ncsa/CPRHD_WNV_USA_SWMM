@@ -35,6 +35,7 @@ def create_input_file(row, gi_type=None):
         file.write(writeString)
 
         # [EVAPORATION]
+        # TODO Get Evaporation data
         evaporationString = '[EVAPORATION]\n;;DATA\tSource\tParameters\n;;------------------------\n\n'  # Write [EVAPORATION] header
         file.write(evaporationString)
 
@@ -49,11 +50,20 @@ def create_input_file(row, gi_type=None):
         writeString = '[SUBCATCHMENTS]\n'
         writeString += ';;Name\tRain Gage\tOutlet\tArea\t%Imperv\tWidth\t%Slope\tCurbLen\tSnowPack\n'
         writeString += ';;------------------------------------------------------------------------------\n'
-        writeString += 'Subcatch1\tRainGage2\tOutfall1\t' + row['Area_acre_30m'] + '\tFILL\t' + row['WIDTH_30m'] + '\t' + row['pctslope_avg_30m'] + '\t0\n'
+
+        # There are three possible impervious percentages depending on the GI type
+        imperv_percent = row['PCT_I_adj_30m']
+        if gi_type == 'barrel':
+            imperv_percent = row['RB_SC1_PCT_I_30m']
+        elif gi_type == 'garden':
+            imperv_percent = row['RG1_PCT_I_adj_30m']
+
+        writeString += 'Subcatch1\tRainGage2\tOutfall1\t' + row['Area_acre_30m'] + '\t' + imperv_percent + '\t' + row['WIDTH_30m'] + '\t' + row['pctslope_avg_30m'] + '\t0\n'
         writeString += 'Subcatch2\tRainGage2\tOutfall1\t0\t100\t0\t0\t0\n'
         writeString += 'Subcatch3\tRaingage2\tOutfall1\t0.000\t100\t0\t0\t0\n'
+
         if gi_type == 'barrel':
-            writeString += 'Subcatch4\tRainGage2\tCisterns\tFILL\tFILL\tFILL\tFILL\t0\n'
+            writeString += 'Subcatch4\tRainGage2\tCisterns\t' + row['RB_SC1_ACRE_30m'] + '\tFILL\tFILL\tFILL\t0\n'
         else:
             writeString += 'Subcatch4\tRainGage2\tCisterns\t0.000\t100\t0\t0\t0'
         file.write(writeString)
@@ -77,7 +87,7 @@ def create_input_file(row, gi_type=None):
         writeString += '\n;;Subcatchment\tSuction\tKsat\tIMD'
         writeString += '\n;;------------------------------------------------------'
         for i in range(1, 5):
-            writeString += '\nSubcatch'+ str(i) + '\t' + g_ampt_params[0][1] + '\t' + g_ampt_params[1][1] + '\t' + g_ampt_params[2][1]
+            writeString += '\nSubcatch' + str(i) + '\t' + g_ampt_params[0][1] + '\t' + g_ampt_params[1][1] + '\t' + g_ampt_params[2][1]
         file.write(writeString)
 
         # [LID_CONTROLS]
@@ -112,14 +122,16 @@ def create_input_file(row, gi_type=None):
         writeString = '\n\n[LID_USAGE]'
         writeString += '\n;;Subcatchment\tLID\tProcess\tNumber\tArea\tWidth\tInitSat\tFromImp\tToPerv\tRptFile\tDrainTo'
         if gi_type == 'garden':
-            writeString += '\nFILL\tFILL\tFILL\tFILL\tFILL\tFILL\tFILL\tFILL'
+            writeString += '\nSubcatch1\tRainGarden\t1\tFILL\tFILL\tFILL\tFILL\tFILL'
+        else:
+            writeString += '\nSubcatch1\tRainGarden\t1\t0\t0\t0\t0\t0'
         file.write(writeString)
 
         # [JUNCTIONS]
         if gi_type != 'barrel':
             writeString = '\n\n[JUNCTIONS]'
             writeString += '\n;;Name\tElevation\tMaxDepth\tInitDepth\tSurDepth\tAponded'
-            writeString += '\n---------------------------------------------------------'
+            writeString += '\n;;---------------------------------------------------------'
             writeString += '\nCisterns\t0\t0\t0\t0\t0'
             file.write(writeString)
 
@@ -161,7 +173,7 @@ def create_input_file(row, gi_type=None):
             for line in reader:
                 date = line[0][5:7] + '/' + line[0][-2:] + '/' + line[0][:4]  # Convert date from YYYY-MM-DD to MM/DD/YYYY (SWMM format)
                 if start_date_compare <= line[0] <= end_date_compare:  # If the timeseries is within our start and end range
-                    writeString += (row['PRISM_ID'] + '\t\t' + date + '\t' + '0:00:00' + '\t' + line[1] + '\n')
+                    writeString += (row['PRISM_ID'] + '\t' + date + '\t' + '0:00:00' + '\t' + line[1] + '\n')
         file.write(writeString)
 
         # [REPORT]
@@ -238,13 +250,6 @@ def createWeatherDictionary(characteristics_dict):
 
         geoids_list = []
 
-        # for value in dictionary.values():
-        #     geoid_list = []
-        #     for geoid in value:
-        #         geoid_list.append(geoid)
-        #     geoids_list.append(geoid_list)
-        # print(geoids_list)
-
         for key in dictionary.items():
             geoid_list = []
             for geoid in key[1]:
@@ -258,8 +263,6 @@ def createWeatherDictionary(characteristics_dict):
                 dictionary[P_ID] = geoids_list[count]
                 count += 1
 
-        # for key, val in dictionary.items():
-        #     dictionary[key][val] =
 
     writer = csv.writer(open('dictionary.csv', 'w'))
     for key, val in dictionary.items():

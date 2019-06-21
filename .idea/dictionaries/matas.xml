@@ -2,8 +2,10 @@
   <dictionary name="matas">
     <words>
       <w>dataframe</w>
+      <w>evap</w>
       <w>fips</w>
       <w>geoid</w>
+      <w>geotiff</w>
       <w>postconditions</w>
       <w>raingage</w>
       <w>subcatch</w>
