@@ -14,13 +14,13 @@ def process_output(output_file, daily=True):
 
     all_dataframe = swmmtoolbox.extract(output_file, *input_parameter_list)  # Extract all parameters
 
-    filename = './data/binary_csv' + output_file[6:-4] + '.csv'  # Make a pretty .csv file name
+    filename = './data/binary_csv' + output_file[6:-4] + '.csv'  # Set the .csv file name
 
-    if not daily:
-        with open(filename, 'w') as file:
-            pd.DataFrame.to_csv(all_dataframe, file)  # Write the entire data-frame to a .csv file
-    else:
+    if daily:
         all_dataframe = all_dataframe.resample('d').sum()  # Group by day ('d') and sum.
         with open(filename, 'w') as file:
-            pd.DataFrame.to_csv(all_dataframe, file)
+            pd.DataFrame.to_csv(all_dataframe, file)  # Write to .csv file
+    else:
+        with open(filename, 'w') as file:
+            pd.DataFrame.to_csv(all_dataframe, file)  # Write the entire data-frame to a .csv file
 
