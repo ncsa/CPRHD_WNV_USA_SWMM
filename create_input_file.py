@@ -13,7 +13,7 @@ def create_input_file(row, gi_type=None):
 
         # [OPTIONS]
         # [OPTIONS] data
-        start_date = '01/01/1981'
+        start_date = '01/01/1981'  # MM/DD/YYYY Format
         end_date = '12/31/2014'
         optionsVars = [['FLOW_UNITS', 'CFS'], ['INFILTRATION', 'GREEN_AMPT'], ['FLOW_ROUTING', 'KINWAVE'],
                        ['LINK_OFFSETS', 'DEPTH'], ['MIN_SLOPE', '0'], ['ALLOW_PONDING', 'NO'], ['SKIP_STEADY_STATE', 'NO\n'],
