@@ -72,6 +72,6 @@ This function accepts 12-digit GEOIDs and returns a list with the state name, co
 This module moves all .rpt files from ./data to ./data/report_files.
 
 # About / Contact
-#### Worked on by [Matas Lauzadis](https://github.com/mataslauzadis) during Summer 2019's REU-INCLUSION for NCSA's Computational Program for Racial Health Disparities.  
+#### Worked on by [Matas Lauzadis](https://github.com/mataslauzadis) during Summer 2019's REU-INCLUSION for NCSA's [Computational Program for Racial Health Disparities](https://wiki.ncsa.illinois.edu/display/CPRHD).  
 #### Contact: matas.lauzadis@gmail.com
 
