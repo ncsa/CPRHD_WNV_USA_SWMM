@@ -4,14 +4,14 @@ import rasterio  # For reading geotiff files into numpy arrays
 import numpy as np  # For interacting with the numpy array
 import glob  # For finding geotiff files
 import pandas as pd  # Dataframes
-from tqdm import tqdm  # Progress bar
+from tqdm import tqdm  # Progress bars
 
 # Plotting modules
 import rasterio.plot as rplot
 from matplotlib import pyplot as plt
 
 
-def NETCDF_to_geotiff(netcdf):
+def NETCDF_to_geotiff(netcdf, overwrite=True):
     gdal.UseExceptions()  # Force gdal to terminate program with exceptions instead of warnings
     in_ds = gdal.Open('NETCDF:' + netcdf + ':evap')  # Open the file as NETCDF, and only take the evaporation data
 
@@ -24,17 +24,17 @@ def NETCDF_to_geotiff(netcdf):
     year = 1979  # Start year
     month = 1  # Start month
 
-    for i in range(1, raster_count + 1):  # gdal indices start at 1
+    for i in tqdm(range(1, raster_count + 1)):  # gdal indices start at 1
         if month < 10:  # Prepend a '0' to the month (if needed) to keep consistent filename lengths
             string_month = '0' + str(month)
         else:
             string_month = str(month)
         filename = str(year) + '_' + string_month  # Format: YYYY_MM
 
-        if path.exists(file_dir + filename + '.geotiff'):  # Check if the .geotiff already exists
+        if path.exists(file_dir + filename + '.geotiff') and overwrite is False:  # Check if the .geotiff already exists
             pass
         else:
-            translate_options = gdal.TranslateOptions(options='-b ' + str(i) + ' -of GTiff', outputSRS='epsg:4326')  # 'options' represents command-line-like flags. ex. -b represents band number
+            translate_options = gdal.TranslateOptions(options='-b ' + str(i) + ' -of GTiff', outputSRS='EPSG:102009')  # 'options' represents command-line-like flags. ex. -b represents band number
             out_ds = gdal.Translate(file_dir + filename + '.geotiff', in_ds, options=translate_options)
             out_ds = None  # Save, close
 
@@ -117,19 +117,12 @@ def extract_evaporation_data(geotiff_files):
     frame.to_pickle('./data/evap/pickled_array')
 
 
-# geotiff_files = glob.glob('./data/evap/geotiff/*.geotiff')
-# extract_evaporation_data(geotiff_files)
-
-frame = pd.read_pickle('./data/evap/pickled_array')
-
-# Negative values example
-# sub_frame = frame.loc[(frame['x'] == 140) & (frame['y'] == 140) & (frame['month'] == 'January')]
-# print(sub_frame)
-
-x_count = frame.loc[(frame['y'] == 1) & (frame['year'] == 1979) & (frame['month'] == 'January')].shape[0]  # Isolate X to get the count
-y_count = frame.loc[(frame['x'] == 1) & (frame['year'] == 1979) & (frame['month'] == 'January')].shape[0]  # Isolate Y to get the count
-for x in range(x_count):
-    for y in range(y_count):
-        sub_frame = frame.loc[(frame['x'] == x) & (frame['y'] == y) & (frame['month'] == 'January')]
-        print(sub_frame)
-        print('X:', x, 'Y:', y, 'Average value:', sub_frame['value'].mean())
+def get_average_evaporation(pickled_array):
+    frame = pd.read_pickle(pickled_array)
+    x_count = frame.loc[(frame['y'] == 1) & (frame['year'] == 1979) & (frame['month'] == 'January')].shape[0]  # Isolate X to get the count
+    y_count = frame.loc[(frame['x'] == 1) & (frame['year'] == 1979) & (frame['month'] == 'January')].shape[0]  # Isolate Y to get the count
+    for x in range(150, x_count):
+        for y in range(150, y_count):
+            sub_frame = frame.loc[(frame['x'] == x) & (frame['y'] == y) & (frame['month'] == 'January')]
+            print('X:', x, 'Y:', y, 'Average value:', sub_frame['value'].mean())
+            
