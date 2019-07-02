@@ -1,4 +1,4 @@
-# CPRHD - West Nile Virus - USA - SWMM Analysis Tools
+# Computational Program for Racial Health Disparities - West Nile Virus - USA - Storm Water Management Model Tools
 # Setup
 ## Directory Setup
 ```
