@@ -27,7 +27,7 @@ Project_base
    
    Folder: └───
   
-# Code Documentation 
+# Documentation 
 ## Main Modules
 ### [swmm.py](https://github.com/mataslauzadis/SWMM/blob/master/swmm.py)
 Using [pyswmm](https://github.com/OpenWaterAnalytics/pyswmm), this module converts .inp files to .out and .rpt files, then, using [swmmtoolbox](https://github.com/timcera/swmmtoolbox), extracts the data from the binary .out file and stores it in a .csv file.
