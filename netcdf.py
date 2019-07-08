@@ -16,7 +16,7 @@ import rasterio.plot as rplot
 from matplotlib import pyplot as plt
 
 
-def NETCDF_to_geotiff(netcdf_file, overwrite=False):
+def netcdf_to_geotiff(netcdf_file, overwrite=False):
     gdal.UseExceptions()  # Force gdal to terminate program with exceptions instead of warnings
 
     last_slash = (netcdf_file.rfind('/')) + 1  # Find the last occurrence of the slash in the file directory
