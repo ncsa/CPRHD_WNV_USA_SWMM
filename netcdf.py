@@ -1,10 +1,8 @@
-
 import rasterio  # For interacting with geotiff files
 
 import numpy as np  # For interacting with the numpy array
 import pandas as pd  # Dataframes
 import glob  # For finding geotiff files
-
 
 from tqdm import tqdm  # Progress bar
 from tqdm import trange  # Progress bar with built in 'range' function
@@ -15,15 +13,18 @@ from os import path  # For checking if files already exist
 import rasterio.plot as rplot
 from matplotlib import pyplot as plt
 
-
-def netcdf_to_geotiff(netcdf_file, overwrite=False):
-    gdal.UseExceptions()  # Force gdal to terminate program with exceptions instead of warnings
+from osgeo import gdal  # For translating NETCDF to geotiff
+gdal.UseExceptions()  # Force gdal to terminate program with exceptions instead of warnings
 
 
 def warp_geotiff(netcdf_file, overwrite=False):
+    # TODO Add a projection string parameter
+    # Preconditions: A NETCDF file has been passed.
+    # Postconditions: The NetCDF file's projection has been warped to the specified projection, and it has been saved as a GeoTIFF.
 
-    last_slash = (netcdf_file.rfind('/')) + 1  # Find the last occurrence of the slash in the file directory
-    file_dir = (netcdf_file[:last_slash]) + 'geotiff/'  # Find the directory of the NetCDF file
+    # Directory / Name Management
+    last_slash = (netcdf_file.rfind('/')) + 1
+    file_dir = (netcdf_file[:last_slash]) + 'geotiff/'
 
     if not path.exists('./data/evap/warped_netcdf.geotiff'):  # If the NetCDF has not been warped yet
         lambert_conformal_conic_proj = '+proj=lcc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs'  # Define the projection we will use for the warp
@@ -33,6 +34,9 @@ def warp_geotiff(netcdf_file, overwrite=False):
 
 
 def extract_bands(geotiff, overwrite=True):
+    # Preconditions: A NARR GeoTIFF containing 485 monthly bands has been passed.
+    # Postconditions: 485 individual GeoTIFF files, one for each month, have been created.
+
     in_ds = gdal.Open(geotiff)
     last_slash = (geotiff.rfind('\\')) + 1  # Find the last occurrence of the slash in the file directory
     file_dir = (geotiff[:last_slash]) + 'geotiff/'  # Find the directory of the NetCDF file
@@ -151,10 +155,37 @@ def get_average_evaporation(frame):
         return sub_frame
 
 
-def dataframe_to_geotiff(data):
-    # Preconditions: A list of all evaporation data has been passed
-    # Postconditions: A geotiff file has been created containing the data
-    with rasterio.open('./data/evap/template.geotiff') as src:
-        metadata = src.profile
-    with rasterio.open('output.geotiff', 'w', **metadata) as dst:
-        dst.write(data, 1)
+def average_to_ascii():
+    # Preconditions: The average evaporation rate for each month in pandas pickle form exists in ./data/evap/average/month_number_average
+    # Postconditions: An ASCII file has been created which can then be translated to GeoTIFF
+    for month in tqdm(range(1, 13)):
+
+        if month < 10: # If the month is 0-9, prepend a 0 to the front
+            avg_frame = pd.read_pickle('./data/evap/average/0' + str(month) + '_average')
+        else: # Just write the number
+            avg_frame = pd.read_pickle('./data/evap/average/' + str(month) + '_average')
+
+        with open('./data/evap/average/ascii/' + str(month) + '.txt', 'w') as file:  # Open a new ASCII file based on the month's number
+            # Set Initial Parameters - from template GeoTIFF
+            writeString = 'ncols\t\t388\n'
+            writeString += 'nrows\t\t316\n'
+            writeString += 'xllcorner\t-6121312.596054837108\n'
+            writeString += 'yllcorner\t-3833307.251033219509\n'
+            writeString += 'dx\t\t30002.267236048923\n'
+            writeString += 'dy\t\t30079.792474384965\n'
+            writeString += 'NODATA_value\t9.9692099683868690468e+36\n'
+            file.write(writeString)
+
+            writeString = ''
+
+            for i in range(0, 316):  # Loop through the rows
+                sub_frame = avg_frame.loc[(avg_frame['y'] == i)]  # Find all the values for the row number
+                sub_frame.drop(labels=['x', 'y'], axis=1, inplace=True)  # Drop columns (we only need the value)
+                sub_frame.reset_index(inplace=True, drop=True)  # Reset the index (not sure if necessary)
+                series = sub_frame.squeeze()  # Convert Dataframe to Series
+
+                for value in series:  # Loop through each value in the row
+                    writeString += str(value) + ' '  # Add the value plus a space delimiter
+                writeString += '\n'
+
+            file.write(writeString)  # Write the data to the ASCII file

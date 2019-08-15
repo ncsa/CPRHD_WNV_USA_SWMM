@@ -12,15 +12,18 @@ def process_output(output_file, daily=True):
     for variable in variableList:  # Make a parameter list
         input_parameter_list.append('system,' + variable + ',' + variable)
 
-    all_dataframe = swmmtoolbox.extract(output_file, *input_parameter_list)  # Extract all parameters
+    frame = swmmtoolbox.extract(output_file, *input_parameter_list)  # Extract all parameters
 
     filename = './data/binary_csv' + output_file[6:-4] + '.csv'  # Set the .csv file name
 
     if daily:
-        all_dataframe = all_dataframe.resample('d').sum()  # Group by day ('d') and sum.
+        frame = frame.resample('d').sum()  # Group by day ('d') and sum.
+        frame.columns = ['rainfall', 'evaporation_infiltration', 'runoff', 'total_lateral_inflow', 'flow_leaving_outfalls', 'evaporation_rate', 'potential_PET']
         with open(filename, 'w') as file:
-            pd.DataFrame.to_csv(all_dataframe, file)  # Write to .csv file
+            pd.DataFrame.to_csv(frame, file)  # Write to .csv file
     else:
         with open(filename, 'w') as file:
-            pd.DataFrame.to_csv(all_dataframe, file)  # Write the entire data-frame to a .csv file
+            pd.DataFrame.to_csv(frame, file)  # Write the entire data-frame to a .csv file
+
+
 

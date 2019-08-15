@@ -34,11 +34,14 @@ def fips_conversion(fips_code):
 
     state_code = fips_code[:2]
     county_code = fips_code[2:5]
-    census_tract = fips_code[5:9]
-    census_block_group = fips_code[9:]
-
     converted_fips = _fips_dict[state_code][county_code]
-    return [converted_fips[0], converted_fips[1], census_tract, census_block_group]
+
+    if len(fips_code) > 5:
+        census_tract = fips_code[5:9]
+        census_block_group = fips_code[9:]
+        return [converted_fips[0], converted_fips[1], census_tract, census_block_group]
+    return converted_fips
 
 
 _fips_dict = fips_to_dict()  # Create the dictionary for use in fips_conversion
+
