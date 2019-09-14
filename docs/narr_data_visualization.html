@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8"/>
+  <title>NARR Data Visualization</title>
+</head>
+<body>
+  <img src="" id="imageDisplay">
+  <div class="slidecontainer">
+    <input type="range" min="0" max="484" value="0" class="slider" id="picSlider">
+  </div>
+
+
+  <script>
+    var slider = document.getElementById("picSlider");
+    var image = document.getElementById("imageDisplay");
+    image.src = getPictureDirectory(slider.value);
+
+    slider.oninput = function(){
+      image.src = getPictureDirectory(this.value)
+    }
+
+    function numToDate(value){
+      return numToMonth(value % 12) + ", " + (Math.floor(value / 12) + 1979);
+    }
+    function numToMonth(value){
+      var months = ["January", "February", "March", "April", "June", "July", "August", "September", "October", "November", "December"];
+      return months[value];
+    }
+    function getPictureDirectory(value){
+      var month = (value % 12) + 1;
+      var year = Math.floor(value/12) + 1979;
+      if(month < 10){
+        month = "0" + month;
+      }
+      return "./image/" + year + "_" + month + ".png";
+    }
+  </script>
+</body>
+
+<style>
+    .slidecontainer {
+      width: 100%;
+    }
+    
+    .slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 25px;
+      background: #d3d3d3;
+      outline: none;
+      opacity: 0.7;
+      -webkit-transition: .2s;
+      transition: opacity .2s;
+    }
+    
+    .slider:hover {
+      opacity: 1;
+    }
+    
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 25px;
+      height: 25px;
+      background: #4CAF50;
+      cursor: pointer;
+    }
+    
+    .slider::-moz-range-thumb {
+      width: 25px;
+      height: 25px;
+      background: #4CAF50;
+      cursor: pointer;
+    }
+    </style>
+</html>

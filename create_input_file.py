@@ -198,10 +198,11 @@ def create_input_file_rain_garden(row, namespace):
             end_date_compare = end_date[-4:] + '-' + end_date[:2] + '-' + end_date[3:5]  # Convert to YYYY-MM-DD
 
             for line in reader:
-                date = line[0][5:7] + '/' + line[0][-2:] + '/' + line[0][:4]  # Convert date from YYYY-MM-DD to MM/DD/YYYY (SWMM format)
-                if start_date_compare <= line[0] <= end_date_compare:  # If the timeseries is within our start and end range
-                    writeString += (row['PRISM_ID'] + '\t' + date + '\t' + '0:00:00' + '\t' + line[1] + '\n')
-        file.write(writeString)
+                if line:
+                    date = line[0][5:7] + '/' + line[0][-2:] + '/' + line[0][:4]  # Convert date from YYYY-MM-DD to MM/DD/YYYY (SWMM format)
+                    if start_date_compare <= line[0] <= end_date_compare:  # If the timeseries is within our start and end range
+                        writeString += (row['PRISM_ID'] + '\t' + date + '\t' + '0:00:00' + '\t' + line[1] + '\n')
+            file.write(writeString)
 
         # [REPORT]
         reportVars = [['INPUT', 'NO'], ['CONTROLS', 'NO'], ['SUBCATCHMENTS', 'ALL'], ['NODES', 'ALL'], ['LINKS', 'ALL']]
@@ -425,10 +426,11 @@ def create_input_file_rain_barrel(row, namespace):
             end_date_compare = end_date[-4:] + '-' + end_date[:2] + '-' + end_date[3:5]  # Convert to YYYY-MM-DD
 
             for line in reader:
-                date = line[0][5:7] + '/' + line[0][-2:] + '/' + line[0][:4]  # Convert date from YYYY-MM-DD to MM/DD/YYYY (SWMM format)
-                if start_date_compare <= line[0] <= end_date_compare:  # If the timeseries is within our start and end range
-                    writeString += (row['PRISM_ID'] + '\t' + date + '\t' + '0:00:00' + '\t' + line[1] + '\n')
-        file.write(writeString)
+                if line:
+                    date = line[0][5:7] + '/' + line[0][-2:] + '/' + line[0][:4]  # Convert date from YYYY-MM-DD to MM/DD/YYYY (SWMM format)
+                    if start_date_compare <= line[0] <= end_date_compare:  # If the timeseries is within our start and end range
+                        writeString += (row['PRISM_ID'] + '\t' + date + '\t' + '0:00:00' + '\t' + line[1] + '\n')
+            file.write(writeString)
 
         # [REPORT]
         reportVars = [['INPUT', 'NO'], ['CONTROLS', 'NO'], ['SUBCATCHMENTS', 'ALL'], ['NODES', 'ALL'], ['LINKS', 'ALL']]
@@ -641,10 +643,11 @@ def create_input_file_no_gi(row, namespace):
             end_date_compare = end_date[-4:] + '-' + end_date[:2] + '-' + end_date[3:5]  # Convert to YYYY-MM-DD
 
             for line in reader:
-                date = line[0][5:7] + '/' + line[0][-2:] + '/' + line[0][:4]  # Convert date from YYYY-MM-DD to MM/DD/YYYY (SWMM format)
-                if start_date_compare <= line[0] <= end_date_compare:  # If the timeseries is within our start and end range
-                    writeString += (row['PRISM_ID'] + '\t' + date + '\t' + '0:00:00' + '\t' + line[1] + '\n')
-        file.write(writeString)
+                if line:
+                    date = line[0][5:7] + '/' + line[0][-2:] + '/' + line[0][:4]  # Convert date from YYYY-MM-DD to MM/DD/YYYY (SWMM format)
+                    if start_date_compare <= line[0] <= end_date_compare:  # If the timeseries is within our start and end range
+                        writeString += (row['PRISM_ID'] + '\t' + date + '\t' + '0:00:00' + '\t' + line[1] + '\n')
+            file.write(writeString)
 
         # [REPORT]
         reportVars = [['INPUT', 'NO'], ['CONTROLS', 'NO'], ['SUBCATCHMENTS', 'ALL'], ['NODES', 'ALL'], ['LINKS', 'ALL']]
@@ -716,6 +719,6 @@ if __name__ == '__main__':
     start_time = time.time()
     pool = Pool()
     # pool.map(create_input_file_no_gi, characteristics_row_dict)
-    pool.map(partial(create_input_file_rain_garden, namespace=namespace), characteristics_row_dict)
+    pool.map(partial(create_input_file_no_gi, namespace=namespace), characteristics_row_dict)
 
     print('File processing elapsed time:', time.time() - start_time)

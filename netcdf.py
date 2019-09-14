@@ -17,45 +17,35 @@ from osgeo import gdal  # For translating NETCDF to geotiff
 gdal.UseExceptions()  # Force gdal to terminate program with exceptions instead of warnings
 
 
-def warp_geotiff(netcdf_file, overwrite=False):
-    # TODO Add a projection string parameter
-    # Preconditions: A NETCDF file has been passed.
-    # Postconditions: The NetCDF file's projection has been warped to the specified projection, and it has been saved as a GeoTIFF.
+def warp_netcdf_to_geotiff(netcdf_file, subdataset, proj4, output_directory):
+    # Warps and converts NetCDF to GeoTIFF
+    #   netcdf_file: Directory of the NetCDF file you are warping
+    #   subdataset: The subdataset of the NetCDF file (can be found by running gdalinfo on the file (ex. air, evap))
+    #   proj4: The proj4 string of the desired projection
+    #   output_directory: Where to save the output file (include file name!)
 
-    # Directory / Name Management
-    last_slash = (netcdf_file.rfind('/')) + 1
-    file_dir = (netcdf_file[:last_slash]) + 'geotiff/'
-
-    if not path.exists('./data/evap/warped_netcdf.geotiff'):  # If the NetCDF has not been warped yet
-        lambert_conformal_conic_proj = '+proj=lcc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs'  # Define the projection we will use for the warp
-        warp_options = gdal.WarpOptions(options='-t_srs \"' + lambert_conformal_conic_proj + '\" -of GTiff ')  # Set warp options with command line-like flags
-        ds = gdal.Warp(srcDSOrSrcDSTab='NETCDF:./data/evap/evap.mon.mean.nc:evap', destNameOrDestDS='./data/evap/warped_netcdf.geotiff', options=warp_options)  # Warp the NetCDF, and store the output in warped_netcdf.geotiff
-        ds = None  # Save, close
+    warp_options = gdal.WarpOptions(options='-t_srs \"' + proj4 + '\" -of GTiff ')  # Set warp options with command line-like flags
+    ds = gdal.Warp(srcDSOrSrcDSTab='NETCDF:' + netcdf_file + ':' + subdataset, destNameOrDestDS=output_directory, options=warp_options)  # Warp the NetCDF, and store the output in the output directory
+    ds = None  # Save, close
 
 
-def extract_bands(geotiff, overwrite=True):
-    # Preconditions: A NARR GeoTIFF containing 485 monthly bands has been passed.
-    # Postconditions: 485 individual GeoTIFF files, one for each month, have been created.
+def extract_bands(geotiff, output_destination):
+    # Extracts individual bands from a geotiff file (use with warp_netcdf_to_geotiff)
+    #   geotiff: directory to the warped geotiff file
+    #   output_destination: directory to the folder which will contain the individual geotiff files
 
     in_ds = gdal.Open(geotiff)
-    last_slash = (geotiff.rfind('\\')) + 1  # Find the last occurrence of the slash in the file directory
-    file_dir = (geotiff[:last_slash]) + 'geotiff/'  # Find the directory of the NetCDF file
     raster_count = in_ds.RasterCount  # Obtain the number of bands to loop through
     year = 1979  # Start year
     month = 1  # Start month
 
     for i in trange(1, raster_count + 1):  # gdal indices start at 1
-        if month < 10:  # Prepend a '0' to the month (if needed) to keep consistent filename lengths
-            string_month = '0' + str(month)
-        else:
-            string_month = str(month)
-        filename = str(year) + '_' + string_month  # Format: YYYY_MM
+        filename = str(year) + '_' + str(month)  # File name format: YYYY_MM
+        if month < 10:  # Prepend a '0' to the month to keep consistent filename lengths (ex. 1979_1 --> 1979_01)
+            filename = str(year) + '_0' + str(month)
 
-        if path.exists(file_dir + filename + '.geotiff') and overwrite is False:  # Check if the .geotiff already exists
-            pass
-        else:
-            translate_options = gdal.TranslateOptions(options='-b ' + str(i) + ' -of GTiff')  # similar to command-line flags: -b represents band number, -of represents the driver
-            out_ds = gdal.Translate(destName=(file_dir + filename + '.geotiff'), srcDS=in_ds, options=translate_options)  # Do the translation
+        translate_options = gdal.TranslateOptions(options='-b ' + str(i) + ' -of GTiff')  # similar to command-line flags: -b represents band number, -of represents the driver
+        gdal.Translate(destName=(output_destination + filename + '.geotiff'), srcDS=in_ds, options=translate_options)
 
         # Increment year and month
         if i % 12 == 0:
@@ -65,12 +55,12 @@ def extract_bands(geotiff, overwrite=True):
         month += 1
 
 
-def create_evaporation_plot(file, type='image'):
+def create_plot(file, output_destination, type='image'):
     # Preconditions: A .geotiff file has been passed. Optional: A type of output has been selected (histogram or image) - default is image
     # Postconditions: A figure has been saved to either /histogram/figure.png or /image/figure.png
 
     with rasterio.open(file) as raster:
-        name = file[-15:-8]  # File name (ex. 1979_01)
+        file_name = file[-15:-8]  # File name (ex. 1979_01)
         figure = plt.figure(figsize=(5.0, 5.0))  # Create a 500x500 figure
         axes1 = figure.add_subplot(1, 1, 1)  # Create a subplot within the figure
 
@@ -79,10 +69,11 @@ def create_evaporation_plot(file, type='image'):
         elif type == 'histogram':
             rplot.show_hist(raster, ax=axes1)  # Make a histogram, and store it in axes1
 
-        month = convert_int_to_month(int(name[-2:])-1)  # Subtract one since January is 01 but indices start at 0.
-        axes1.set_title(month + ' ' + name[:4])  # Set the title of the plot (ex. January 1979)
-
-        plt.savefig('./data/evap/' + type + '/' + name + '.png')  # Store image or histogram in ./data/evap/image or /histogram
+        month = convert_int_to_month(int(file_name[-2:])-1)  # Subtract one since January is 01 but indices start at 0.
+        axes1.set_title('Air Temperature 2m\n' + month + ' ' + file_name[:4])  # Set the title of the plot (ex. January 1979)
+        plt.xticks([])
+        plt.yticks([])
+        plt.savefig(output_destination + file_name + '.png')  # Store image or histogram in ./data/evap/image or /histogram
         plt.close()  # Clean up
 
 
