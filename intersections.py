@@ -3,42 +3,41 @@ import geopandas as gpd
 import pandas as pd
 from tqdm import tqdm
 import glob
-# from multiprocessing import Pool
-# from functools import partial
+from multiprocessing import Pool
+from functools import partial
 
 
 def intersections(raster_file, shape_file):
     # Preconditions: A shape file and raster file have been passed, each having the same projection.
     # Postconditions: A pandas dataframe has been returned, holding the min, max, mean, and count for each polygon in the shape file.
     shape_frame = gpd.read_file(shape_file)
+    shape = shape_frame.to_crs({'init': 'epsg:4326', 'no_defs': True})  # Change the projection to your shapefile's projection
 
-    shape = shape_frame.to_crs({'init': 'epsg:5070', 'no_defs': True})
-
-    output = ['min', 'max', 'mean', 'count']
-    stats = rs.zonal_stats(shape, raster_file, stats=output, all_touched=True)
+    output_columns = ['min', 'max', 'mean']
+    stats = rs.zonal_stats(shape, raster_file, stats=output_columns, all_touched=True)
     frame = pd.DataFrame.from_dict(stats)
-    shape_frame['GEOID10'] = shape_frame['GEOID10'].astype(str)
-    print(shape_frame['GEOID10'])
-    frame = frame.join(shape_frame['GEOID10'])
+    shape_frame['GEOID'] = shape_frame['GEOID'].astype(str)
+    frame = frame.join(shape_frame['GEOID'])
+    frame = frame.join(shape_frame['NAME'])
     return frame
 
 
-# SINGLE THREADED
+def multithread_helper(raster_file, shape_file):
+    filename = raster_file[-15:-8]
+    print(filename)
+    frame = intersections(raster_file, shape_file)
+    frame.to_csv('../narr_data_fix/rhum.2m/' + filename + '.csv')
+
+
+# SINGLE THREADED OPERATION
+# shape_file = '../narr_data_fix/urban_counties/urban_counties_wnv_4326.shp'
+# file_list = glob.glob('../narr_data_fix/air.2m_geotiff/*.geotiff')
 # for file in tqdm(file_list):
-#     frame = intersections('./data/evap/shape_files/county/tl_2017_us_county.shp', file)
-#     frame.to_csv('./data/evap/rohan/air.2m/intersection/' + file[-15:-8] + '.csv')
+#     frame = intersections(file, shape_file)
 
 
-# MULTI THREADED
+# MULTI THREADED OPERATION
 # if __name__ == '__main__':
-#
-#     file_list = []
-#     for i in range(1999, 2016):
-#         file_list.extend(glob.glob('./data/evap/rohan/rhum.2m/geotiff/' + str(i) + '*.geotiff'))
-#
-#     arg_list = ['./data/evap/shape_files/county/tl_2017_us_county.shp', ] * len(file_list)
-#     arg_list = tuple(zip(arg_list, file_list))
-#     print(arg_list[0][0], arg_list[0][1])
+#     file_list = glob.glob('../narr_data_fix/rhum.2m_geotiff/*.geotiff')
 #     pool = Pool()
-#     # pool.map(intersections, ['./data/evap/shape_files/county/tl_2017_us_county.shp', arg_list])
-#     pool.map(partial(intersections, shape_file='./data/evap/shape_files/urban_county/2017_us_urban_county.shp'), file_list)
+#     pool.map(partial(multithread_helper, shape_file=shape_file), file_list)
