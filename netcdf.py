@@ -7,7 +7,7 @@ import glob  # For finding geotiff files
 from tqdm import tqdm  # Progress bar
 from tqdm import trange  # Progress bar with built in 'range' function
 
-from os import path  # For checking if files already exist
+import os
 
 # Plotting modules
 import rasterio.plot as rplot
@@ -15,6 +15,10 @@ from matplotlib import pyplot as plt
 
 from osgeo import gdal  # For translating NETCDF to geotiff
 gdal.UseExceptions()  # Force gdal to terminate program with exceptions instead of warnings
+
+import sys
+sys.path.insert(1, 'C:/Users/matas/Anaconda3/envs/SWMM/Lib/site-packages/GDAL-2.3.3-py3.7-win-amd64.egg-info/scripts/')
+import gdal_calc
 
 
 def warp_netcdf_to_geotiff(netcdf_file, subdataset, proj4, output_directory):
@@ -180,3 +184,13 @@ def average_to_ascii():
                 writeString += '\n'
 
             file.write(writeString)  # Write the data to the ASCII file
+
+
+def apply_mask(raster_file, mask_file, output_destination):
+    gdal_calc.Calc('A*B', A=raster_file, B=mask_file, outfile=output_destination, NoDataValue=0, format='GTiff')
+
+
+def format_neighbors(row):
+    if row == 'nan':
+        row = 'None'
+    return row
