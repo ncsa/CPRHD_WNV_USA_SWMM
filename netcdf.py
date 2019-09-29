@@ -16,9 +16,7 @@ from matplotlib import pyplot as plt
 from osgeo import gdal  # For translating NETCDF to geotiff
 gdal.UseExceptions()  # Force gdal to terminate program with exceptions instead of warnings
 
-import sys
-sys.path.insert(1, 'C:/Users/matas/Anaconda3/envs/SWMM/Lib/site-packages/GDAL-2.3.3-py3.7-win-amd64.egg-info/scripts/')
-import gdal_calc
+
 
 
 def warp_netcdf_to_geotiff(netcdf_file, subdataset, proj4, output_directory):
@@ -186,11 +184,11 @@ def average_to_ascii():
             file.write(writeString)  # Write the data to the ASCII file
 
 
-def apply_mask(raster_file, mask_file, output_destination):
-    gdal_calc.Calc('A*B', A=raster_file, B=mask_file, outfile=output_destination, NoDataValue=0, format='GTiff')
-
-
 def format_neighbors(row):
     if row == 'nan':
         row = 'None'
     return row
+
+
+# warp_netcdf_to_geotiff('../evap.mon.mean.nc', 'evap', '+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=1,1,-1,0,0,0,0 +units=m +no_defs', '../evap/evap.mon.mean.geotiff')
+extract_bands('../evap/evap.mon.mean.geotiff', '../evap/unmasked_geotiff/')
