@@ -522,14 +522,9 @@ def create_input_file_no_gi(row, namespace):
         values = namespace.evap.loc[row['GEOID10']].values.T.tolist()
 
         writeString += 'MONTHLY\t'
-        for val in values[4:]:
-            if val < 0:
-                namespace.failed_evap.append(row['GEOID10'])
-                print('***NEGATIVE EVAPORATION ERROR***')
-                with open('./data/input_files/failed/' + str(row['GEOID10']) + '.txt', 'w') as fail_file:
-                    pass
-                return
+        for val in values[2:]:
             writeString += str(val) + '\t'
+
         writeString += '\nDRY_ONLY\tYES\n\n'
         file.write(writeString)
 
@@ -702,13 +697,14 @@ if __name__ == '__main__':
     temp_columns = list(characteristics_frame.columns)
     temp_columns[0] = 'GEOID10'
     characteristics_frame.columns = temp_columns
+
     characteristics_row_dict = characteristics_frame.T.to_dict().values()   # Load each row into a list of dictionaries
 
     # Manager shares data between threads
     manager = Manager()
     namespace = manager.Namespace()
 
-    evaporation_dataframe = pd.read_pickle('./data/input_file_data/evaporation.pkl')
+    evaporation_dataframe = pd.read_pickle('./data/input_file_data/evaporation_converted.pkl')
     namespace.evap = evaporation_dataframe
 
     namespace.failed_evap = []
