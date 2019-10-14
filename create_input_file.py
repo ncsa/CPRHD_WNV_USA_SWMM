@@ -482,7 +482,7 @@ def create_input_file_no_gi(row, namespace):
         return
 
     with open('./data/input_files/no_green_infrastructure/' + row['GEOID10'] + '_ng.inp', 'w') as file:
-        print('Processing', row['GEOID10'])
+        print(row['GEOID10'], '- No Green Infrastucture')
 
         # Write [TITLE] Header
         location = fips_conversion(row['GEOID10'])  # Convert the GeoID10 to State / County / Tract / Block Group
