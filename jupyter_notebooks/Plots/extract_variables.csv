@@ -1,0 +1,16 @@
+,No GI,Rain Barrel,Rain Garden
+'Air_temperature',1,1,1
+ 'Rainfall',1,1,1
+" 'Snow_depth',",0,0,0
+" 'Evaporation_infiltration',",1,1,1
+" 'Runoff',",1,1,1
+" 'Dry_weather_inflow',",0,0,0
+" 'Groundwater_inflow',",0,0,0
+" 'RDII_inflow',",0,0,0
+" 'User_direct_inflow',",0,0,1
+" 'Total_lateral_inflow',",1,1,1
+" 'Flow_lost_to_flooding',",0,1,0
+" 'Flow_leaving_outfalls',",1,1,1
+" 'Volume_stored_water',",0,1,0
+" 'Evaporation_rate',",1,1,1
+ 'Potential_PET',1,1,1
