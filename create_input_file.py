@@ -21,7 +21,7 @@ def writeVariable(name, value):
 
 def create_input_file_rain_garden(row, namespace):
     with open('./data/input_files/rain_garden/' + row['GEOID10'] + '_rg.inp', 'w') as file:
-        print('Processing', row['GEOID10'])
+        print(row['GEOID10'], '- Rain Garden')
 
         # Write [TITLE] Header
         location = fips_conversion(row['GEOID10'])  # Convert the GeoID10 to State / County / Tract / Block Group
@@ -61,13 +61,7 @@ def create_input_file_rain_garden(row, namespace):
         values = namespace.evap.loc[row['GEOID10']].values.T.tolist()
 
         writeString += 'MONTHLY\t'
-        for val in values[4:]:
-            if val < 0:
-                namespace.failed_evap.append(row['GEOID10'])
-                print('***NEGATIVE EVAPORATION ERROR***')
-                with open('./data/input_files/failed/rain_barrel/' + str(row['GEOID10']) + '.txt', 'w') as fail_file:
-                    pass
-                return
+        for val in values[1:]:
             writeString += str(val) + '\t'
         writeString += '\nDRY_ONLY\tYES\n\n'
         file.write(writeString)
@@ -248,7 +242,7 @@ def create_input_file_rain_garden(row, namespace):
 
 def create_input_file_rain_barrel(row, namespace):
     with open('./data/input_files/rain_barrel/' + row['GEOID10'] + '_rb.inp', 'w') as file:
-        print('Processing', row['GEOID10'])
+        print(row['GEOID10'], '- Rain Barrel')
 
         # Write [TITLE] Header
         location = fips_conversion(row['GEOID10'])  # Convert the GeoID10 to State / County / Tract / Block Group
@@ -288,13 +282,7 @@ def create_input_file_rain_barrel(row, namespace):
         values = namespace.evap.loc[row['GEOID10']].values.T.tolist()
 
         writeString += 'MONTHLY\t'
-        for val in values[4:]:
-            if val < 0:
-                namespace.failed_evap.append(row['GEOID10'])
-                print('***NEGATIVE EVAPORATION ERROR***')
-                with open('./data/input_files/failed/rain_barrel/' + str(row['GEOID10']) + '.txt', 'w') as fail_file:
-                    pass
-                return
+        for val in values[1:]:
             writeString += str(val) + '\t'
         writeString += '\nDRY_ONLY\tYES\n\n'
         file.write(writeString)
@@ -522,7 +510,7 @@ def create_input_file_no_gi(row, namespace):
         values = namespace.evap.loc[row['GEOID10']].values.T.tolist()
 
         writeString += 'MONTHLY\t'
-        for val in values[2:]:
+        for val in values[1:]:
             writeString += str(val) + '\t'
 
         writeString += '\nDRY_ONLY\tYES\n\n'
@@ -686,19 +674,26 @@ def create_input_file_no_gi(row, namespace):
         file.write(writeString)
 
 
-if __name__ == '__main__':
-    start_time = time.time()
-    print('Started setup')
+def create_specific_input_file(row, namespace, type='no_gi'):
+    if type is 'rain_barrel':
+        create_input_file_rain_barrel(row, namespace)
+    elif type is 'rain_garden':
+        create_input_file_rain_garden(row, namespace)
+    else:
+        create_input_file_no_gi(row, namespace)
 
+
+if __name__ == '__main__':
     with open('./data/input_file_data/Selected_BG_inputs_20180208.csv') as characteristics_file:
         characteristics_frame = pd.read_csv(characteristics_file, skip_blank_lines=True, low_memory=False, dtype=str)   # Read the green infrastructure data to a pandas dataframe
 
-    # Change the GeoID column name since it has some weird characters
-    temp_columns = list(characteristics_frame.columns)
-    temp_columns[0] = 'GEOID10'
-    characteristics_frame.columns = temp_columns
+        # Change the GeoID column name since it has some weird characters
+        temp_columns = list(characteristics_frame.columns)
+        temp_columns[0] = 'GEOID10'
+        characteristics_frame.columns = temp_columns
 
-    characteristics_row_dict = characteristics_frame.T.to_dict().values()   # Load each row into a list of dictionaries
+        # Load each row of the CSV into a list of dictionaries
+        characteristics_row_dict = characteristics_frame.T.to_dict().values()
 
     # Manager shares data between threads
     manager = Manager()
@@ -707,14 +702,5 @@ if __name__ == '__main__':
     evaporation_dataframe = pd.read_pickle('./data/input_file_data/evaporation_converted.pkl')
     namespace.evap = evaporation_dataframe
 
-    namespace.failed_evap = []
-
-    print('Setup time:', time.time() - start_time)
-
-    # Send the threads to process the input files
-    start_time = time.time()
-    pool = Pool()
-    # pool.map(create_input_file_no_gi, characteristics_row_dict)
-    pool.map(partial(create_input_file_no_gi, namespace=namespace), characteristics_row_dict)
-
-    print('File processing elapsed time:', time.time() - start_time)
+    # pool = Pool()
+    # pool.map(partial(create_input_file_no_gi, namespace=namespace), characteristics_row_dict)

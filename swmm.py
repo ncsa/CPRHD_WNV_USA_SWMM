@@ -11,10 +11,11 @@ import sys  # Used for suppressing output
 def process_input(input_file):
     #  Preconditions: 'file' has been passed, containing the directory path for a .inp file
     #  Postconditions: The SWMM model has created a .out and .rpt file in the base_directory\data folder based on the parameters given in the .inp file.
-    Simulation.execute = suppressOutput(Simulation.execute)  # Make it so that sim.execute() does not print anything
-    with Simulation(input_file) as sim:
-        sim.execute()
-        sim.close()
+    print(input_file)
+    sim = Simulation(input_file)
+    sim.execute()
+    # Simulation(input_file).execute()
+
 
 
 def process_output(output_file, daily=True):
@@ -52,27 +53,37 @@ def complete_process(input_file):
     # os.remove(output_file)  # Remove the .out file
 
 
-def suppressOutput(func):  # This function redirects stdout to a null variable so it doesn't get printed
-    def wrapper(*args, **kwargs):
-        with open(os.devnull, 'w') as devNull:
-            original = sys.stdout
-            sys.stdout = devNull
-            func(*args, **kwargs)
-            sys.stdout = original
-    return wrapper
+# def suppressOutput(func):  # This function redirects stdout to a null variable so it doesn't get printed
+#     def wrapper(*args, **kwargs):
+#         with open(os.devnull, 'w') as devNull:
+#             original = sys.stdout
+#             sys.stdout = devNull
+#             func(*args, **kwargs)
+#             sys.stdout = original
+#     return wrapper
 
 
 if __name__ == '__main__':
-    start_time = time.time()
+    # no_gi = glob.glob('./data/input_files/no_green_infrastructure/*.inp')
+    # rain_barrel = glob.glob('./data/input_files/rain_barrel/*.inp')
+    # rain_garden = glob.glob('./data/input_files/rain_garden/*.inp')
+    # no_gi.extend(rain_barrel)
+    # no_gi.extend(rain_garden)
 
-    input_files = glob.glob('./data/*.inp')
-    pool = Pool()
-    pool.map(complete_process, input_files)
-    print('Elapsed time with multi-threading:', '%.2f' % (time.time() - start_time), 'seconds.')
+    california_sensitivity = glob.glob('../plots/california/sensitivity_analysis/*.inp')
+    chicago_sensitivity = glob.glob('../plots/chicago/sensitivity_analysis/*.inp')
 
-    # # Single thread test
-    # start_time = time.time()
-    # for file in input_files:
-    #     complete_process(file)
-    # print('Elapsed time with single thread:', time.time() - start_time)
+    print(chicago_sensitivity)
+    print(california_sensitivity)
 
+
+    #Multi Thread
+    # pool = Pool()
+    # pool.map(process_input, no_gi)
+
+    # Single Thread
+    for file in chicago_sensitivity:
+        process_input(file)
+
+    for file in california_sensitivity:
+        process_input(file)
