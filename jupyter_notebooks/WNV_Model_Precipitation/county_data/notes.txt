@@ -1,0 +1,21 @@
+1. dry_days_filtered: count of all dry days, filtered to only count above-freezing precipitation
+2. dry_days_unfiltered: count of all dry days including below-freezing
+
+3. filtered_aggregated_precipitation: sum of above-freezing precipitation 
+4. unfiltered_aggregated_precipitation: sum of all precipitation
+
+5. max_consecutive_dry_days: count of maximum dry-day streak for each county / year
+
+6. gini_index: gini index over all precipitation
+7. theil_index: theil index over all precipitation
+8. gini_index_summer: gini index over the period June 1 to August 1
+9. theil_index_summer: theil index over the period June 1 to August 1
+
+!!!
+Note the following data is not comparable to other indices,
+by filtering the data to only above-freezing temperatures we introduce
+different sized datasets for each county
+!!!
+
+10. gini_index_filtered: gini index over above-freezing precipitation
+11. theil_index_filtered: theil index over above-freezing precipitation
