@@ -4,6 +4,7 @@ import glob
 import numpy as np
 import pandas as pd
 import sys
+from tqdm import tqdm
 
 # Raster Data
 import rasterstats as rs
@@ -14,10 +15,10 @@ import matplotlib.pyplot as plt
 import calendar
 
 
-def get_precipitation_timeseries_data(geoid, geotiffs, shape_file):
+def get_precipitation_timeseries_data(geoid, geotiffs, shape_frame):
     # Returns the precipitation data given a geoid and a list of masked GeoTIFFs
-    shape = gpd.read_file(shape_file)
-    shape = shape[shape['GEOID10'] == geoid].reset_index()
+    # shape = gpd.read_file(shape_file)
+    shape = shape_frame[shape_frame['GEOID10'] == geoid].reset_index()
 
     # Specify output statistics for zonal_stats
     output_stats = ['mean']
@@ -48,11 +49,10 @@ def get_precipitation_timeseries_data(geoid, geotiffs, shape_file):
     data.index = data.index.astype(int)
     data = data.sort_index()
 
-    data.to_pickle('./test.pkl')
     return data.to_numpy()
 
 
-def create_input_file_no_gi(row, evap, outfile, type='daily'):
+def create_input_file_no_gi(row, evap, shape_frame, outfile, type='daily'):
     # outfile = './data/input_files/no_green_infrastructure/' + row['GEOID10'] + '_ng.inp'
     outfile = outfile
 
@@ -61,11 +61,11 @@ def create_input_file_no_gi(row, evap, outfile, type='daily'):
         return
 
     with open(outfile, 'w') as file:
-        print(row['GEOID10'], '- No Green Infrastucture')
-
         # Write [TITLE] Header
         writeString = '[TITLE]\n'
-        writeString += ';; No Green Infrastructure\n\n'
+        writeString += ';; No Green Infrastructure\n'
+        writeString += ';; ' + row['GEOID10'] + ' ' + row['STATE'] + ', ' + row['COUNTY'] + ' County\n'
+        writeString += ';; Tract: ' + row['TRACT'] + '\tBlock Group: ' + row['BG_ID'] + '\n\n'
         file.write(writeString)
 
         # [OPTIONS]
@@ -218,7 +218,7 @@ def create_input_file_no_gi(row, evap, outfile, type='daily'):
             name = 'NARR_3HR'
             frequency = '3H'
 
-        precipitation_data = get_precipitation_timeseries_data(row['GEOID10'], geotiffs, './shape_file/SelectBG_all_land_BGID_final.gpkg')
+        precipitation_data = get_precipitation_timeseries_data(row['GEOID10'], geotiffs, shape_frame)
         date_range = pd.date_range(start=start_date, end='1/1/2015', freq=frequency)[:-1]
 
         for i in range(len(precipitation_data)):
@@ -280,13 +280,29 @@ def writeVariable(name, value):
     return name + tabs + value + '\n'
 
 
-characteristics_file = '../../data/input_file_data/Selected_BG_inputs_20180208.csv'
-characteristics_frame = pd.read_csv(characteristics_file, skip_blank_lines=True, low_memory=False, dtype=str)  # Read the green infrastructure data to a pandas dataframe
+def main():
+    # Load Block Group Characteristics
+    characteristics_file = '../../data/input_file_data/Selected_BG_inputs_20191212.csv'
+    characteristics_frame = pd.read_csv(characteristics_file, skip_blank_lines=True, low_memory=False, dtype=str)  # Read the green infrastructure data to a pandas dataframe
 
-row = characteristics_frame.loc[characteristics_frame['GEOID10'] == '060375508003'].reset_index(drop=True).iloc[0]
+    # Load Evaporation Data
+    evap = pd.read_pickle('../../data/input_file_data/evaporation_converted.pkl')
 
-evap = pd.read_pickle('../../data/input_file_data/evaporation_converted.pkl')
-evap = evap.loc[row['GEOID10']]
+    # Load Block Group Shape File
+    shape_frame = gpd.read_file('./shape_file/SelectBG_all_land_BGID_final.gpkg')
 
+    # List of GeoID's we want to create input files for
+    geoids = ['260810146022', '060375508003', '170319800001', '080310034021', '482019801001', '120110502083', '360470220002']
 
-create_input_file_no_gi(row, evap, './california_hourly.inp', type='hourly')
+    for geoid in tqdm(geoids):
+        for type in ['daily', 'hourly']:
+            row = characteristics_frame.loc[characteristics_frame['GEOID10'] == geoid].reset_index(drop=True).iloc[0]  # Select the block group's information
+            evap_data = evap.loc[row['GEOID10']]  # Select the block group's evaporation data
+
+            name = row['STATE'].lower()
+            outfile = './' + type + '/simulation_files/' + name + '_ng_' + type + '.inp'
+            print(outfile)
+            create_input_file_no_gi(row, evap_data, shape_frame, outfile, type=type)
+
+if __name__ == '__main__':
+    main()
