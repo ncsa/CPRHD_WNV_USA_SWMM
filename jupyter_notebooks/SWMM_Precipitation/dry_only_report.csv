@@ -1,0 +1,84 @@
+California,3-Hourly,Daily,PRISM
+Total Precipitation,59.245,59.245,51.258
+Evaporation Loss,5.262 ,5.757 ,5.432 
+Infiltration Loss,20.502,23.829,20.047
+Surface Runoff,33.370,29.488,25.606
+Final Storage,0.126 ,0.176 ,0.177 
+Continuity Error,"0.026
+","0.009
+","0.008
+"
+
+
+Colorado,3-Hourly,Daily,PRISM
+Total Precipitation,397.46,397.46,363.25
+Evaporation Loss,36.083,42.605,27.800
+Infiltration Loss,313.38,313.37,286.40
+Surface Runoff,47.995,41.356,49.069
+Final Storage,0.132 ,0.144 ,0.000 
+Continuity Error,"0.032
+","0.005
+","0.006
+"
+
+
+Florida,3-Hourly,Daily,PRISM
+Total Precipitation,3345.4,3345.4,6608.9
+Evaporation Loss,1113.1,1314.1,1273.6
+Infiltration Loss,1343.3,1343.3,2653.7
+Surface Runoff,890.40,688.04,681.28
+Final Storage,0.006 ,0.005 ,0.663 
+Continuity Error,"0.044
+","0.004
+","0.008
+"
+
+
+Illinois,3-Hourly,Daily,PRISM
+Total Precipitation,16171.,16171.,14537.
+Evaporation Loss,3203.2,4100.1,3224.2
+Infiltration Loss,4074.7,4624.1,3954.2
+Surface Runoff,8910.6,7449.4,7361.6
+Final Storage,0.000 ,0.000 ,0.000 
+Continuity Error,"0.103
+","0.011
+","0.017
+"
+
+
+Michigan,3-Hourly,Daily,PRISM
+Total Precipitation,5629.3,5629.3,5164.1
+Evaporation Loss,418.89,554.17,451.98
+Infiltration Loss,4236.5,4236.5,3886.4
+Surface Runoff,976.30,839.02,826.11
+Final Storage,0.065 ,0.002 ,0.017 
+Continuity Error,"0.044
+","0.007
+","0.009
+"
+
+
+New york,3-Hourly,Daily,PRISM
+Total Precipitation,55.011,55.011,57.109
+Evaporation Loss,10.213,12.920,11.259
+Infiltration Loss,3.352 ,3.362 ,3.490 
+Surface Runoff,41.478,38.734,42.368
+Final Storage,0.000 ,0.000 ,0.000 
+Continuity Error,"0.060
+","0.010
+","0.014
+"
+
+
+Texas,3-Hourly,Daily,PRISM
+Total Precipitation,28778.,28778.,33015.
+Evaporation Loss,3080.7,3997.0,3163.5
+Infiltration Loss,16390.,16400.,18815.
+Surface Runoff,9329.8,8383.5,1039.8
+Final Storage,0.000 ,0.000 ,0.000 
+Continuity Error,"0.079
+","0.010
+","0.011
+"
+
+
