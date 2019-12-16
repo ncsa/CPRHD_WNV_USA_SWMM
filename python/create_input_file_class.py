@@ -3,13 +3,9 @@ import sys
 import pandas as pd
 from multiprocessing import Manager
 import glob
-import geopandas as gpd
-import rasterstats as rs
 from tqdm import tqdm
 
-
 overwrite = True
-
 
 # No Green Infrastructure: https://docs.google.com/document/d/1_rnpjv8CfboOivYl6W7affA1tcGYJgd-x4SOpYENsFo/edit
 # Rain Garden: https://docs.google.com/document/d/1rpHAjt9MIGfQ17Wkbi4D-vHnY5gNW7pggtyGmI2G1RM/edit
