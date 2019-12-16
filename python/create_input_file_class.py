@@ -3,11 +3,8 @@ import sys
 import pandas as pd
 from multiprocessing import Manager
 import glob
-<<<<<<< HEAD
-=======
 import geopandas as gpd  # For NARR Input File Creation
 import rasterstats as rs  # For NARR Input File Creation
->>>>>>> Added LID usage for Rain Garden scenario
 from tqdm import tqdm
 
 overwrite = True
