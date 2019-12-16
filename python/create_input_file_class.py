@@ -3,6 +3,11 @@ import sys
 import pandas as pd
 from multiprocessing import Manager
 import glob
+<<<<<<< HEAD
+=======
+import geopandas as gpd  # For NARR Input File Creation
+import rasterstats as rs  # For NARR Input File Creation
+>>>>>>> Added LID usage for Rain Garden scenario
 from tqdm import tqdm
 
 overwrite = True
@@ -16,13 +21,12 @@ class InputFile:
         self.sim_type = str(sim_type)
         self.data = row
         self.namespace = namespace
-        try:
-            assert (not os.path.exists(outfile) or overwrite)
-        except AssertionError:
+
+        if os.path.exists(outfile) and not overwrite:
             print('File already exists!', outfile)
             exit(1)
-        self.file = open(outfile, 'w')
 
+        self.file = open(outfile, 'w')
         self.start = '01/01/1981'
         self.end = '12/31/2014'
         self.precipitation_data_type = 'PRISM'
@@ -36,26 +40,25 @@ class InputFile:
     def set_end_date(self, date):
         self.end = str(date)
 
-    def create_file(self):
-        self.title()
-        self.file.write('\n\n')
-        self.options()
-        self.file.close()
-
-    def get_sim_type(self):
+    def get_sim_name(self):
         if self.sim_type == 'ng':
             return 'No Green Infrastructure'
         elif self.sim_type == 'rb':
             return 'Rain Barrel'
         elif self.sim_type == 'rg':
             return 'Rain Garden'
+        else:
+            print('Unknown Simulation Input! (ng = No Green Infrastructure, rb = Rain Barrel, rg = Rain Garden')
+            exit(1)
+
 
     def title(self):
         self.file.write('[TITLE]\n')
-        self.file.write(';; ' + self.get_sim_type() + '\n')
+        self.file.write(';; ' + self.get_sim_name() + '\n')
         self.file.write(
             ';; ' + self.data['GEOID10'] + ' ' + self.data['STATE'] + ', ' + self.data['COUNTY'] + ' County\n')
         self.file.write(';; Tract: ' + self.data['TRACT'] + '\tBlock Group: ' + self.data['BG_ID'] + '\n\n')
+
 
     def options(self):
         self.file.write('[OPTIONS]\n')
@@ -91,6 +94,7 @@ class InputFile:
 
         self.file.write('\n')
 
+
     def evaporation(self):
         self.file.write('[EVAPORATION]\n')
         self.file.write('MONTHLY\t')
@@ -111,6 +115,12 @@ class InputFile:
                                'SCF': '1.0',  # snow catch deficiency correction factor (use 1.0 for no adjustment)
                                'Tseries': 'TIMESERIES ' + self.data['PRISM_ID']
                               }
+
+        if self.precipitation_data_type != 'PRISM':
+            raingage_parameters['Tseries'] = 'TIMESERIES ' + self.precipitation_data_type.upper()
+        if self.precipitation_data_type == 'narr_hourly':
+            raingage_parameters['Interval'] = '03:00:00'
+
         for key in raingage_parameters:
             self.file.write(raingage_parameters[key] + '\t')
         self.file.write('\n\n')
@@ -139,13 +149,12 @@ class InputFile:
         self.file.write(
             'Subcatch1\tRainGage2\tOutfall1\t' + subcatchment_area + '\t' + subcatchment_imperv + '\t' + subcatchment_width + '\t' + slope_pct + '\t0\n')
         self.file.write('Subcatch2\tRainGage2\tOutfall1\t0\t100\t0\t0\t0\n')
-        self.file.write('Subcatch3\tRaingage2\tOutfall1\t0.000\t100\t0\t0\t0\n')
+        self.file.write('Subcatch3\tRaingage2\tOutfall1\t0\t100\t0\t0\t0\n')
         if self.sim_type == 'rb':
             self.file.write(
                 'Subcatch4\tRainGage2\tCisterns\t' + rainbarrel_area + '\t100\t' + rainbarrel_width + '\t' + slope_pct + '\t0\n')
         else:
             self.file.write('Subcatch4\tRainGage2\tCisterns\t0\t100\t0\t0\t0\n')
-
         self.file.write('\n')
 
 
@@ -207,8 +216,7 @@ class InputFile:
                            'FC': self.data['RG1_FIELDCAP'],  # soil field capacity
                            'WP': self.data['RG1_WILTPT'],  # soil wilting point
                            'Ksat': self.data['RG1_Ks'],  # soil's saturated hydraulic conductivity (inches / hr)
-                           'Kcoeff': self.data['RG1_Ks_SLOPE'],
-                           # slope of the curve of log(conductivity) vs. soil moisture content
+                           'Kcoeff': self.data['RG1_Ks_SLOPE'], # slope of the curve of log(conductivity) vs. soil moisture content
                            'Suct': self.data['RG1_SH']  # soil capillary suction (inches)
                            }
             self.file.write(
@@ -228,30 +236,6 @@ class InputFile:
 
         elif self.sim_type == 'rb':  # LID Control for Rain Barrel
             self.file.write('RainBarrel\tRB\n')
-
-            # SURFACE
-            surface_params = {'StorHt': '6',  # maximum depth of ponded water before overflow (inches)
-                              'VegFrac': '0',  # fraction of storage volume filled with vegetation
-                              'Rough': '0',  # Manning's n (EPA Manual recommends 0)
-                              'Slope': '0',  # Slope of the surface (EPA Manual recommends 0)
-                              'Xslope': '0'}  # Slope of side walls of vegetative swale (EPA Manual recommends 0)
-            self.file.write(
-                'RainBarrel\tSURFACE\t' + surface_params['StorHt'] + '\t' + surface_params['VegFrac'] + '\t' +
-                surface_params['Rough'] + '\t' + surface_params['Slope'] + '\t' + surface_params['Xslope'] + '\n')
-
-            # SOIL
-            soil_params = {'Thick': '12',  # thickness of soil layer (inches)
-                           'Por': '0.45',  # soil porosity
-                           'FC': '0.1',  # soil field capacity
-                           'WP': '0.05',  # soil wilting point
-                           'Ksat': '10',  # soil's saturated hydraulic conductivity (inches / hr)
-                           'Kcoeff': '10',  # slope of the curve of log(conductivity) vs. soil moisture content
-                           'Suct': '1.6'  # soil capillary suction (inches)
-                           }
-            self.file.write(
-                'RainBarrel\tSOIL\t' + soil_params['Thick'] + '\t' + soil_params['Por'] + '\t' + soil_params[
-                    'FC'] + '\t' + soil_params['WP'] + '\t' + soil_params['Ksat'] + '\t' + soil_params[
-                    'Kcoeff'] + '\t' + soil_params['Suct'] + '\n')
 
             # STORAGE
             storage_params = {'Height': '0',  # height of the rain barrel storage (inches)
@@ -281,11 +265,39 @@ class InputFile:
         # TODO
         self.file.write('[LID_USAGE]\n')
         self.file.write(
-            ';;Subcatchment\tLID\tProcess\tNumber\tArea\tWidth\tInitSat\tFromImp\tToPerv\tRptFile\tDrainTo\n')
+            ';;Subcatchment\tLID_Process\tNumber\tArea\tWidth\tInitSat\tFromImp\tToPerv\tRptFile\tDrainTo\n')
         if self.sim_type == 'rg':
-            self.file.write('Subcatch1\tRainGarden\t1\t0\t0\t0\t0\t0\n')
+            usage_parameters = {'Name': 'Subcatch1',  # Name of Subcatchment
+                                'LID': 'RainGarden',  # Name of LID Control (defined above)
+                                'Number': '1',  # Number of units
+                                'Area': self.data['RG1_AREA_SQRFT'],  # Area of each replicate unit
+                                'Width': '0',  # Recommended 0 for Bio-retention cells, Rain Gardens, Rain Barrels
+                                'InitSat': '0',  # Initial saturation of soil
+                                'FromImp': self.data['RG1_PCT_I_TREAT_30m'],  # Percentage of impervious runoff diverted to this LID (recommended 0 for direct rainfall only)
+                                'ToPerv': '0',  # 1 is recommended for rain barrel, possibly green roof
+                                'RptFile': '',  # Specify if you want an individual report file for this LID
+                                'DrainTo': '',  # Name of subcatchment that receives flow from this unit's drain line, if different than the outlet of the Subcatchment
+                                }
 
+            for key in usage_parameters:
+                self.file.write(usage_parameters[key] + '\t')
+            self.file.write('\n')
+
+        elif self.sim_type == 'rb':
+            #TODO Does this need to be implemented for Rain Barrel Scenario?
+            usage_parameters = {'Name': 'Subcatch4',  # Name of Subcatchment
+                                'LID': 'RainBarrel',  # Name of LID Control (defined above)
+                                'Number': '1',  # Number of units
+                                'Area': self.data['SCA_ROOF_ACRE'],  # Area of each replicate unit
+                                'Width': '0',  # Recommended 0 for Bio-retention cells, Rain Gardens, Rain Barrels
+                                'InitSat': '0',  # Initial saturation of soil
+                                'FromImp': '',  # Percentage of impervious runoff diverted to this LID (recommended 0 for direct rainfall only)
+                                'ToPerv': '0',  # 1 is recommended for rain barrel, possibly green roof
+                                'RptFile': '',  # Specify if you want an individual report file for this LID
+                                'DrainTo': '',  # Name of subcatchment that receives flow from this unit's drain line, if different than the outlet of the Subcatchment
+                                }
         self.file.write('\n')
+
 
     def junctions(self):
         if self.sim_type == 'rb':
@@ -305,13 +317,24 @@ class InputFile:
         for key in junction_params:
             self.file.write(junction_params[key] + '\t')
         self.file.write('\n\n')
-    # self.file.write('\n')
 
 
     def outfalls(self):
         self.file.write('[OUTFALLS]\n')
-        self.file.write(';;Name\tElevation\tType\Stage Data\tGated Route To\n')
-        self.file.write('Outfall1\t0\tFREE\n\n')
+        self.file.write(';;Name\tElevation\tType\tStage Data\tGated Route To\n')
+
+        outfalls_parameters = {'Name': 'Outfall1',
+                               'Elevation': '0',
+                               'Type': 'FREE',
+                               'Stage Data': 'NO'
+                               }
+
+        if self.sim_type == 'rb':
+            outfalls_parameters['Stage Data'] = ''
+
+        for key in outfalls_parameters:
+            self.file.write(outfalls_parameters[key] + '\t')
+        self.file.write('\n\n')
 
 
     def storage(self):
@@ -420,6 +443,17 @@ class InputFile:
             self.file.write('\n\n')
             return
 
+        elif self.precipitation_data_type == 'narr_hourly':
+            masked_geotiffs = glob.glob('../data/input_file_data/narr_masked_geotiffs/hourly/*.geotiff')
+        elif self.precipitation_data_type == 'narr_daily':
+            masked_geotiffs = glob.glob('../data/input_file_data/narr_masked_geotiffs/daily/*.geotiff')
+        shape_file = '../data/input_file_data/SelectBG_all_land_BGID_final.gpkg'
+        # data = self.get_narr_precipitation_data(shape_file, masked_geotiffs)
+
+        data = pd.read_pickle('../jupyter_notebooks/SWMM_Precipitation/' + self.precipitation_data_type[5:] + '/timeseries/' + self.data['STATE'].lower() + '.pkl')
+        data.to_csv(self.file, sep='\t', index=False, header=None)
+        self.file.write('\n')
+
 
     def report(self):
         self.file.write('[REPORT]\n')
@@ -504,17 +538,95 @@ class InputFile:
         self.vertices()
         self.polygons()
         self.symbols()
+        self.file.close()
 
-characteristics_file = '../data/input_file_data/Selected_BG_inputs_20191212.csv'
-characteristics_frame = pd.read_csv(characteristics_file, skip_blank_lines=True, low_memory=False, dtype=str,
-                                    nrows=5)  # Read the green infrastructure data to a pandas dataframe
 
-namespace = Manager().Namespace()
-evaporation_data = pd.read_pickle('../data/input_file_data/evaporation_converted.pkl')
-namespace.evap = evaporation_data
+    def get_narr_precipitation_data(self, shape_file, masked_geotiffs):
+        assert self.start == '01/01/2014' and self.end =='12/31/2014'  # We only have NARR data for 2014
 
-file = InputFile(characteristics_frame.iloc[1], './test_files/test_rg.inp', namespace, 'rg')
-file.set_start_date('01/01/1981')
-file.set_end_date('12/31/2014')
-file.write()
+        shape = gpd.read_file(shape_file)
 
+        shape = shape[shape['GEOID10'] == self.data['GEOID10']].reset_index()
+        output_stats = 'mean'
+
+        # initialize the frame with the first GeoTIFF file
+        name = masked_geotiffs[0][masked_geotiffs[0].rfind('/') + 1:masked_geotiffs[0].rfind('.')]
+        stats = rs.zonal_stats(shape, masked_geotiffs[0], stats=output_stats, all_touched=True)
+        frame = pd.DataFrame.from_dict(stats)
+        frame = frame.join(shape['GEOID10'])
+        frame = frame.rename(columns={'mean': name})
+        frame = frame[['GEOID10', name]]
+
+        # loop through all the GeoTIFFs and join onto the original frame
+        for file in tqdm(masked_geotiffs[1:]):
+            name = file[file.rfind('/') + 1:file.rfind('.')]
+            stats = rs.zonal_stats(shape, file, stats=output_stats, all_touched=True)
+            sub_frame = pd.DataFrame.from_dict(stats)
+            sub_frame = sub_frame.rename(columns={'mean': name})
+            frame = frame.join(sub_frame)
+
+        # Convert to inches
+        data = frame.iloc[0, 1:]
+        data = data.apply(lambda x: x / 25.40)
+
+        # Sort smallest to largest (1, 2, 3, ..., 365)
+        data.index = data.index.astype(int)
+        data = data.sort_index().to_frame('VALUE')
+
+        if self.precipitation_data_type == 'narr_hourly':
+            date_range = pd.date_range(start=self.start, end=pd.to_datetime(self.end) + pd.Timedelta('1 days'), freq='3H')[:-1]
+        else:
+            date_range = pd.date_range(start=self.start, end=pd.to_datetime(self.end) + pd.Timedelta('1 days'), freq='D')[:-1]
+
+        time = date_range.strftime('%H:%M:%S')
+
+        date_range = date_range.strftime('%m/%d/%Y')
+
+        data = data.set_index(date_range, drop=True)
+        data = data.reset_index()
+        data = data.rename(columns={'index': 'DATE'})
+        data['TIME'] = time
+        data['NAME'] = 'NARR_HOURLY'
+
+        data = data[['NAME', 'DATE', 'TIME', 'VALUE']]
+        return data
+
+
+def main():
+    characteristics_file = '../data/input_file_data/Selected_BG_inputs_20191212.csv'
+    # characteristics_frame_debug = pd.read_csv(characteristics_file, skip_blank_lines=True, low_memory=False, dtype=str, nrows=5)  # Read the green infrastructure data to a pandas dataframe
+    characteristics_frame = pd.read_csv(characteristics_file, skip_blank_lines=True, low_memory=False, dtype=str)  # Read the green infrastructure data to a pandas dataframe
+
+    namespace = Manager().Namespace()
+    evaporation_data = pd.read_pickle('../data/input_file_data/evaporation_converted.pkl')
+    namespace.evap = evaporation_data
+
+    geoids = ['260810146022', '060375508003', '170319800001', '080310034021', '482019801001', '120110502083', '360470220002']
+
+    for geoid in tqdm(geoids):
+
+        row = characteristics_frame[characteristics_frame['GEOID10'] == geoid].iloc[0,:]
+
+        for sim_type in ['hourly', 'daily', 'prism']:
+            for lid_type in ['ng', 'rg', 'rb']:
+
+                out_dir = '../jupyter_notebooks/SWMM_Precipitation/' + sim_type + '/simulation_files/' + lid_type + '/'
+                out_file = out_dir + row['STATE'].lower() + '_' + lid_type + '_' + sim_type + '.inp'
+
+                if not os.path.exists(out_dir):
+                    print('Making', out_dir)
+                    os.makedirs(out_dir)
+
+                file = InputFile(row, out_file, namespace, lid_type)
+                if sim_type == 'prism':
+                    file.set_precipitation_data_type('PRISM')
+                else:
+                    file.set_precipitation_data_type('narr_' + sim_type)
+
+                file.set_start_date('01/01/2014')
+                file.set_end_date('12/31/2014')
+
+                file.write()
+
+if __name__ == '__main__':
+    main()
