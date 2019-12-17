@@ -13,6 +13,7 @@ overwrite = True
 # Rain Garden: https://docs.google.com/document/d/1rpHAjt9MIGfQ17Wkbi4D-vHnY5gNW7pggtyGmI2G1RM/edit
 # Rain Barrel: https://docs.google.com/document/d/1Ur0nB_N8GKZwqgg1X6mtUibkHuTgYJ7tisg-DyexPRM/edit
 
+
 class InputFile:
     def __init__(self, row, outfile, namespace, sim_type='ng'):
         self.sim_type = str(sim_type)
@@ -125,7 +126,7 @@ class InputFile:
 
     def subcatchments(self):
         self.file.write('[SUBCATCHMENTS]\n')
-        self.file.write(';;Name\tRain Gage\tOutlet\tArea\t%Imperv\tWidth\t%Slope\tCurbLen\tSnowPack\n')
+        self.file.write(';;Name\tRain_Gage\tOutlet\tArea\t%Imperv\tWidth\t%Slope\tCurbLen\tSnowPack\n')
 
         slope_pct = self.data['pctslope_avg_30m']
         subcatchment_area = self.data['Area_acre_30m']
@@ -145,13 +146,10 @@ class InputFile:
 
         self.file.write(
             'Subcatch1\tRainGage2\tOutfall1\t' + subcatchment_area + '\t' + subcatchment_imperv + '\t' + subcatchment_width + '\t' + slope_pct + '\t0\n')
-        self.file.write('Subcatch2\tRainGage2\tOutfall1\t0\t100\t0\t0\t0\n')
-        self.file.write('Subcatch3\tRaingage2\tOutfall1\t0\t100\t0\t0\t0\n')
+
         if self.sim_type == 'rb':
             self.file.write(
                 'Subcatch4\tRainGage2\tCisterns\t' + rainbarrel_area + '\t100\t' + rainbarrel_width + '\t' + slope_pct + '\t0\n')
-        else:
-            self.file.write('Subcatch4\tRainGage2\tCisterns\t0\t100\t0\t0\t0\n')
         self.file.write('\n')
 
 
@@ -163,28 +161,25 @@ class InputFile:
         s_perv = self.data['DEPRESS_NI_30m']
 
         self.file.write('Subcatch1\t0.01\t' + n_perv + '\t0.05\t' + s_perv + '\t0\tOUTLET\n')
-        self.file.write('Subcatch2\t0\t0\t0\t0\t0\tOUTLET\n')
-        self.file.write('Subcatch3\t0\t0\t0\t6\t0\tOUTLET\n')
+
         if self.sim_type == 'rb':
             self.file.write('Subcatch4\t0.01\t' + n_perv + '\t0.05\t' + s_perv + '\t0\tOUTLET\n')
-        else:
-            self.file.write('Subcatch4\t0\t0\t0\t0\t0\tOUTLET\n')
-
         self.file.write('\n')
 
 
     def infiltration(self):
         g_ampt_params = {
-            'Suction': self.data['GMSH_adj_BG_30m'], 'Ksat': self.data['Keff_adj_BG_30m'],
+            'Suction': self.data['GMSH_adj_BG_30m'],
+            'Ksat': self.data['Keff_adj_BG_30m'],
             'IMD': self.data['AMEP_adj_BG_30m']
         }
 
         self.file.write('[INFILTRATION]\n')
         self.file.write(';;Subcatchment\tSuction\tKsat\tIMD\n')
-        for i in range(1, 5):
-            self.file.write(
-                'Subcatch' + str(i) + '\t' + g_ampt_params['Suction'] + '\t' + g_ampt_params['Ksat'] + '\t' +
-                g_ampt_params['IMD'] + '\n')
+
+        self.file.write('Subcatch1\t' + g_ampt_params['Suction'] + '\t' + g_ampt_params['Ksat'] + '\t' + g_ampt_params['IMD'] + '\n')
+        if self.sim_type == 'rb':
+            self.file.write('Subcatch4\t' + g_ampt_params['Suction'] + '\t' + g_ampt_params['Ksat'] + '\t' + g_ampt_params['IMD'] + '\n')
 
         self.file.write('\n')
 
@@ -416,7 +411,7 @@ class InputFile:
 
         if self.precipitation_data_type == 'PRISM':
             # Read PRISM csv data, format index as datetime
-            precipitation_data = pd.read_csv('../data/input_file_data/weather_data/' + self.data['PRISM_ID'] + '.csv', header=None).set_index(0, drop=True)
+            precipitation_data = pd.read_csv('/home/matas/Desktop/CPRHD_WNV_USA_SWMM/data/input_file_data/weather_data/' + self.data['PRISM_ID'] + '.csv', header=None).set_index(0, drop=True)
             precipitation_data.index = pd.to_datetime(precipitation_data.index).strftime('%m/%d/%Y')
 
             date_range = pd.date_range(self.start, self.end)
@@ -447,7 +442,7 @@ class InputFile:
         shape_file = '../data/input_file_data/SelectBG_all_land_BGID_final.gpkg'
         # data = self.get_narr_precipitation_data(shape_file, masked_geotiffs)
 
-        data = pd.read_pickle('../jupyter_notebooks/SWMM_Precipitation/' + self.precipitation_data_type[5:] + '/timeseries/' + self.data['STATE'].lower() + '.pkl')
+        data = pd.read_pickle('/home/matas/Desktop/CPRHD_WNV_USA_SWMM/jupyter_notebooks/SWMM_Precipitation/' + self.precipitation_data_type[5:] + '/timeseries/' + self.data['STATE'].lower() + '.pkl')
         data.to_csv(self.file, sep='\t', index=False, header=None)
         self.file.write('\n')
 
