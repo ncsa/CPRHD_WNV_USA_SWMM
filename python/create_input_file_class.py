@@ -13,6 +13,9 @@ overwrite = True
 # Rain Garden: https://docs.google.com/document/d/1rpHAjt9MIGfQ17Wkbi4D-vHnY5gNW7pggtyGmI2G1RM/edit
 # Rain Barrel: https://docs.google.com/document/d/1Ur0nB_N8GKZwqgg1X6mtUibkHuTgYJ7tisg-DyexPRM/edit
 
+# Define the absolute path to the Repository
+_repo_path = '/home/matas/Desktop/CPRHD_WNV_USA_SWMM/'
+
 
 class InputFile:
     def __init__(self, row, outfile, namespace, sim_type='ng'):
@@ -29,14 +32,25 @@ class InputFile:
         self.end = '12/31/2014'
         self.precipitation_data_type = 'PRISM'
 
+        if self.sim_type == 'rb':
+            self.rb_type = 'subcatchment'
+
+
+    def set_rainbarrel_type(self, value):
+        self.rb_type = value
+
+
     def set_precipitation_data_type(self, data_type):
         self.precipitation_data_type = str(data_type)
+
 
     def set_start_date(self, date):
         self.start = str(date)
 
+
     def set_end_date(self, date):
         self.end = str(date)
+
 
     def get_sim_name(self):
         if self.sim_type == 'ng':
@@ -61,23 +75,42 @@ class InputFile:
     def options(self):
         self.file.write('[OPTIONS]\n')
 
-        optionVariables = {'FLOW_UNITS': 'CFS', 'INFILTRATION': 'GREEN_AMPT', 'FLOW_ROUTING': 'KINWAVE',
-                           'LINK_OFFSETS': 'DEPTH',
-                           'MIN_SLOPE': '0', 'ALLOW_PONDING': 'NO', 'SKIP_STEADY_STATE': 'NO\n',
+        optionVariables = {#'FLOW_UNITS': 'CFS',  # Default unit
+                           'INFILTRATION': 'GREEN_AMPT',
+                           #'FLOW_ROUTING': 'KINWAVE',  # Default
+                           #'LINK_OFFSETS': 'DEPTH',  # Default
+                           #'MIN_SLOPE': '0',  # Default
+                           #'ALLOW_PONDING': 'NO',  # Default
+                           #'SKIP_STEADY_STATE': 'NO\n',  # Default
 
-                           'START_DATE': self.start, 'START_TIME': '00:00:00',
-                           'REPORT_START_DATE': self.start, 'REPORT_START_TIME': '00:00:00',
-                           'END_DATE': self.end, 'END_TIME': '23:59:59',
-                           'SWEEP_START': self.start[:-5], 'SWEEP_END': self.end[:-5] + '\n',
+                           'START_DATE': self.start,
+                           #'START_TIME': '00:00:00',  # Default
+                           #'REPORT_START_DATE': self.start,  # Default
+                           #'REPORT_START_TIME': '00:00:00',  # Default
+                           'END_DATE': self.end,
+                           'END_TIME': '24:00:00',
+                           'SWEEP_START': self.start[:-5],
+                           'SWEEP_END': self.end[:-5] + '\n',
 
-                           'DRY_DAYS': '0', 'REPORT_STEP': '01:00:00', 'WET_STEP': '00:06:00', 'DRY_STEP': '00:06:00',
+                           #'DRY_DAYS': '0',  # Default
+                           'REPORT_STEP': '24:00:00',
+                           'WET_STEP': '00:06:00',
+                           'DRY_STEP': '00:06:00',
                            'ROUTING_STEP': '00:01:00\n',
 
-                           'INERTIAL_DAMPING': 'PARTIAL', 'NORMAL_FLOW_LIMITED': 'BOTH', 'FORCE_MAIN_EQUATION': 'H-W',
-                           'VARIABLE_STEP': '0.75', 'LENGTHENING_STEP': '0', 'MIN_SURFAREA': '12.557',
-                           'MAX_TRIALS': '8',
-                           'HEAD_TOLERANCE': '0.005', 'SYS_FLOW_TOL': '5', 'LAT_FLOW_TOL': '5', 'MINIMUM_STEP': '0.5',
-                           'THREADS': '1'
+                           #'INERTIAL_DAMPING': 'PARTIAL',  # Only used for Dynamic Wave Flow_Routing
+                           #'NORMAL_FLOW_LIMITED': 'BOTH',  # Default
+                           #'FORCE_MAIN_EQUATION': 'H-W',  # Default
+                           #'VARIABLE_STEP': '0.75',  # Only used for Dynamic Wave Flow_Routing
+                           #'LENGTHENING_STEP': '0',  # Default
+                           #'MIN_SURFAREA': '12.557',  # Only used for Dynamic Wave Flow_Routing
+                           #'MAX_TRIALS': '8',  # Default
+                           #'HEAD_TOLERANCE': '0.005',  # Default
+                           #'SYS_FLOW_TOL': '5',  # Default
+                           #'LAT_FLOW_TOL': '5',  # Default
+                           #'MINIMUM_STEP': '0.5',  # DEfault
+                           #'THREADS': '1',  # Default
+                           'IGNORE_ROUTING': 'YES'  # Ignore's routing information and just gets runoff data
                            }
 
         for key, value in optionVariables.items():
@@ -107,21 +140,32 @@ class InputFile:
         self.file.write('[RAINGAGES]\n')
         self.file.write(';;Name\tFormat\tInterval\tSCF\tSource\n')
 
-        raingage_parameters = {'Name': 'RainGage2',  # name of raingage variable
-                               'Form': 'VOLUME',  # form of recorded rainfall
-                               'Interval': '24:00:00',  # time interval between gage readings
-                               'SCF': '1.0',  # snow catch deficiency correction factor (use 1.0 for no adjustment)
-                               'Tseries': 'TIMESERIES ' + self.data['PRISM_ID']
-                              }
+        raingage_parameters_file =       {'Name': 'RainGage2',  # name of raingage variable
+                                          'Form': 'VOLUME',  # form of recorded rainfall
+                                          'Interval': '24:00:00',  # time interval between gage readings
+                                          'SCF': '1.0',  # snow catch deficiency correction factor (use 1.0 for no adjustment)
+                                          'FILE': 'FILE ' + _repo_path + 'data/input_file_data/weather_data_swmm_format/' + self.data['PRISM_ID'] + '.txt',
+                                          'Sta': self.data['PRISM_ID'],
+                                          'Units': 'IN'
+                                          }
 
-        if self.precipitation_data_type != 'PRISM':
-            raingage_parameters['Tseries'] = 'TIMESERIES ' + self.precipitation_data_type.upper()
+        raingage_parameters_timeseries = {'Name': 'RainGage2',  # name of raingage variable
+                                          'Form': 'VOLUME',  # form of recorded rainfall
+                                          'Interval': '24:00:00',  # time interval between gage readings
+                                          'SCF': '1.0',  # snow catch deficiency correction factor (use 1.0 for no adjustment)
+                                          'Tseries': 'TIMESERIES ' + self.precipitation_data_type.upper()
+                                          }
         if self.precipitation_data_type == 'narr_hourly':
-            raingage_parameters['Interval'] = '03:00:00'
+            raingage_parameters_timeseries['Interval'] = '03:00:00'
 
-        for key in raingage_parameters:
-            self.file.write(raingage_parameters[key] + '\t')
-        self.file.write('\n\n')
+        if self.precipitation_data_type == 'PRISM':
+            for key in raingage_parameters_file:
+                self.file.write(raingage_parameters_file[key] + '\t')
+            self.file.write('\n\n')
+        else:
+            for key in raingage_parameters_timeseries:
+                self.file.write(raingage_parameters_timeseries[key] + '\t')
+            self.file.write('\n\n')
 
 
     def subcatchments(self):
@@ -133,7 +177,7 @@ class InputFile:
         subcatchment_imperv = self.data['PCT_I_adj_30m']
         subcatchment_width = self.data['WIDTH_30m']
 
-        if self.sim_type == 'rb':
+        if self.sim_type == 'rb' and self.rb_type == 'subcatchment':
             subcatchment_area = self.data['RB_SC1_ACRE_30m']
             subcatchment_imperv = self.data['RB_SC1_PCT_I_30m']
             subcatchment_width = self.data['RB_SC1_WIDTH_30m']
@@ -147,7 +191,7 @@ class InputFile:
         self.file.write(
             'Subcatch1\tRainGage2\tOutfall1\t' + subcatchment_area + '\t' + subcatchment_imperv + '\t' + subcatchment_width + '\t' + slope_pct + '\t0\n')
 
-        if self.sim_type == 'rb':
+        if self.sim_type == 'rb' and self.rb_type == 'subcatchment':
             self.file.write(
                 'Subcatch4\tRainGage2\tCisterns\t' + rainbarrel_area + '\t100\t' + rainbarrel_width + '\t' + slope_pct + '\t0\n')
         self.file.write('\n')
@@ -162,7 +206,7 @@ class InputFile:
 
         self.file.write('Subcatch1\t0.01\t' + n_perv + '\t0.05\t' + s_perv + '\t0\tOUTLET\n')
 
-        if self.sim_type == 'rb':
+        if self.sim_type == 'rb' and self.rb_type == 'subcatchment':
             self.file.write('Subcatch4\t0.01\t' + n_perv + '\t0.05\t' + s_perv + '\t0\tOUTLET\n')
         self.file.write('\n')
 
@@ -178,7 +222,7 @@ class InputFile:
         self.file.write(';;Subcatchment\tSuction\tKsat\tIMD\n')
 
         self.file.write('Subcatch1\t' + g_ampt_params['Suction'] + '\t' + g_ampt_params['Ksat'] + '\t' + g_ampt_params['IMD'] + '\n')
-        if self.sim_type == 'rb':
+        if self.sim_type == 'rb' and self.rb_type == 'subcatchment':
             self.file.write('Subcatch4\t' + g_ampt_params['Suction'] + '\t' + g_ampt_params['Ksat'] + '\t' + g_ampt_params['IMD'] + '\n')
 
         self.file.write('\n')
@@ -189,7 +233,6 @@ class InputFile:
         self.file.write('[LID_CONTROLS]\n')
         self.file.write(';;Name\tType\tParameters\n')
         if self.sim_type == 'rg':  # LID Control for Rain Garden
-
             self.file.write('RainGarden\tBC\n')
 
             # SURFACE
@@ -226,35 +269,40 @@ class InputFile:
                 'RainGarden\tSTORAGE\t' + storage_params['Height'] + '\t' + storage_params['Vratio'] + '\t' +
                 storage_params['Seepage'] + '\t' + storage_params['Vclog'] + '\n')
 
-        elif self.sim_type == 'rb':  # LID Control for Rain Barrel
+        elif self.sim_type == 'rb' and self.rb_type == 'lid':  # LID Control for Rain Barrel
             self.file.write('RainBarrel\tRB\n')
 
             # STORAGE
-            storage_params = {'Height': '0',  # height of the rain barrel storage (inches)
-                              'Vratio': '0',  # void ratio
-                              'Seepage': '0.108',  # rate at which water seeps from the layer into the underlying layer
-                              'Vclog': '0'}  # number of void volumes of runoff it takes to clog (use 0 to ignore clogging)
-            self.file.write(
-                'RainBarrel\tSTORAGE\t' + storage_params['Height'] + '\t' + storage_params['Vratio'] + '\t' +
-                storage_params['Seepage'] + '\t' + storage_params['Vclog'] + '\n')
+            storage_params = {
+                                'Height': '48',  # height of the rain barrel storage (inches)
+                                # "values for Vratio, Seepage, and Vclog are ignored for Rain Barrels"
+                                'Vratio': '0',  # void ratio
+                                'Seepage': '0.108',  # rate at which water seeps from the layer into the underlying layer (inches / hour)
+                                'Vclog': '0'  # number of void volumes of runoff it takes to clog (use 0 to ignore clogging)
+                             }
+
+            self.file.write('RainBarrel\tSTORAGE\t')
+            for key in storage_params:
+                self.file.write(storage_params[key] + '\t')
+            self.file.write('\n')
 
             # DRAIN
             drain_params = {'Coeff': '0',  # rate of flow through drain as a function of height of water to drain bottom
-                            'Expon': '0.5',
-                            # rate of flow through the drain as a function of height of water to drain outlet
+                            'Expon': '0.5',  # rate of flow through the drain as a function of height of water to drain outlet
                             'Offset': '6',  # height of the drain line above the bottom of the rain barrel
-                            'Delay': '6'  # number of dry weather hours that elapse before drain line is opened
+                            'Delay': '0'  # number of dry weather hours that elapse before drain line is opened
                             }
-            self.file.write(
-                'RainBarrel\tDRAIN\t' + drain_params['Coeff'] + '\t' + drain_params['Expon'] + '\t' + drain_params[
-                    'Offset'] + '\t' + drain_params['Delay'] + '\n')
 
+            self.file.write('RainBarrel\tDRAIN\t')
+            for key in drain_params:
+                self.file.write(drain_params[key] + '\t')
+            self.file.write('\n')
         self.file.write('\n')
 
 
     def lid_usage(self):
         # Apply the LID parameters to a subcatchment
-        # TODO
+
         self.file.write('[LID_USAGE]\n')
         self.file.write(
             ';;Subcatchment\tLID_Process\tNumber\tArea\tWidth\tInitSat\tFromImp\tToPerv\tRptFile\tDrainTo\n')
@@ -268,32 +316,38 @@ class InputFile:
                                 'FromImp': self.data['RG1_PCT_I_TREAT_30m'],  # Percentage of impervious runoff diverted to this LID (recommended 0 for direct rainfall only)
                                 'ToPerv': '0',  # 1 is recommended for rain barrel, possibly green roof
                                 'RptFile': '',  # Specify if you want an individual report file for this LID
-                                'DrainTo': '',  # Name of subcatchment that receives flow from this unit's drain line, if different than the outlet of the Subcatchment
+                                'DrainTo': '',  # Name of subcatchment that receives flow from this unit's drain line, if different than the outlet of the Subcatchment it is placed in
                                 }
 
             for key in usage_parameters:
                 self.file.write(usage_parameters[key] + '\t')
             self.file.write('\n')
 
-        elif self.sim_type == 'rb':
-            #TODO Does this need to be implemented for Rain Barrel Scenario?
-            usage_parameters = {'Name': 'Subcatch4',  # Name of Subcatchment
+        elif self.sim_type == 'rb' and self.rb_type == 'lid':
+            usage_parameters = {'Name': 'Subcatch1',  # Name of Subcatchment
                                 'LID': 'RainBarrel',  # Name of LID Control (defined above)
                                 'Number': '1',  # Number of units
                                 'Area': self.data['SCA_ROOF_ACRE'],  # Area of each replicate unit
                                 'Width': '0',  # Recommended 0 for Bio-retention cells, Rain Gardens, Rain Barrels
                                 'InitSat': '0',  # Initial saturation of soil
-                                'FromImp': '',  # Percentage of impervious runoff diverted to this LID (recommended 0 for direct rainfall only)
-                                'ToPerv': '0',  # 1 is recommended for rain barrel, possibly green roof
+                                # 'FromImp': str(float(self.data['SCA_ROOF_ACRE']) / float(self.data['Area_acre_30m']) * 100),  # Percentage of impervious runoff diverted to this LID (recommended 0 for direct rainfall only)
+                                'FromImp': '100',
+                                'ToPerv': '1',  # 1 is recommended for rain barrel, possibly green roof
                                 'RptFile': '',  # Specify if you want an individual report file for this LID
                                 'DrainTo': '',  # Name of subcatchment that receives flow from this unit's drain line, if different than the outlet of the Subcatchment
                                 }
+            for key in usage_parameters:
+                self.file.write(usage_parameters[key] + '\t')
+            self.file.write('\n')
         self.file.write('\n')
 
 
     def junctions(self):
-        if self.sim_type == 'rb':
-            return
+        # This is not used from what I can tell
+        return
+
+        # if self.sim_type == 'rb':
+        #     return
 
         self.file.write('[JUNCTIONS]\n')
         self.file.write(';;Name\tElevation\tMaxDepth\tInitDepth\tSurDepth\tAponded\n')
@@ -313,16 +367,14 @@ class InputFile:
 
     def outfalls(self):
         self.file.write('[OUTFALLS]\n')
-        self.file.write(';;Name\tElevation\tType\tStage Data\tGated Route To\n')
+        self.file.write(';;Name\tElevation\tType\tGated\tRoute_To\n')
 
-        outfalls_parameters = {'Name': 'Outfall1',
-                               'Elevation': '0',
+        outfalls_parameters = {'Name': 'Outfall1',  # Name of outfall
+                               'Elevation': '0',  # Invert elevation of outfall
                                'Type': 'FREE',
-                               'Stage Data': 'NO'
+                               'Gated': 'NO',  # If a flap gate is present to prevent reverse flow
+                               'Route_To': ''  # Which subcatchment to route the outfall's discharge to
                                }
-
-        if self.sim_type == 'rb':
-            outfalls_parameters['Stage Data'] = ''
 
         for key in outfalls_parameters:
             self.file.write(outfalls_parameters[key] + '\t')
@@ -331,15 +383,16 @@ class InputFile:
 
     def storage(self):
         # This is only called for the Rain Barrel Scenario
-        if self.sim_type != 'rb':
+        if self.sim_type != 'rb' or self.rb_type == 'lid':
             return
 
         self.file.write('[STORAGE]\n')
+        self.file.write(';;Name\tElevation\tMaxDepth\tAcurve\tA1\tA2\tA0\tApond\tFevap\tPsi\tKsat\tIMD\n')
 
         storage_params = {'Name': 'Cisterns',
                           'Elev': '0',  # Rain barrel invert elevation
-                          'Ymax': '4',  # Rain barrel height
-                          'Y0': '0',  # initial water depth
+                          'Ymax': '4',  # Rain barrel height (maximum depth possible)
+                          'Y0': '0',  # Initial water depth
                           'Acurve': 'FUNCTIONAL',  # Area = A0 + A1 * Depth^(A2)
                           'A1': '0',
                           'A2': '0',
@@ -358,10 +411,11 @@ class InputFile:
 
     def conduits(self):
         # This is only called for the Rain Barrel scenario
-        if self.sim_type != 'rb':
+        if self.sim_type != 'rb' or self.rb_type == 'lid':
             return
 
         self.file.write('[CONDUITS]\n')
+        self.file.write(';;Name\tNode1\t\tNode2\tConduit_Length\tN\tZ1\tZ2\tQ0\n')
         conduit_params = {'Name': 'Dummy2',
                           'Node1': 'Cisterns',  # name of upstream node
                           'Node2': 'Outfall1',  # name of downstream node
@@ -386,10 +440,11 @@ class InputFile:
     def xsections(self):        #
         # Provides cross-section geometric data for [CONDUITS]
         # This is only called for the Rain Barrel scenario
-        if self.sim_type != 'rb':
+        if self.sim_type != 'rb' or self.rb_type == 'lid':
             return
 
         self.file.write('[XSECTIONS]\n')
+        self.file.write(';;Name\tShape\tGeom1\tGeom2\tGeom3\tGeom4\tBarrels\n')
 
         xsections_params = {'Name': 'Dummy2',  # Name of conduit you're defining the cross-section of
                             'Shape': 'DUMMY',  # Cross section shape
@@ -406,8 +461,11 @@ class InputFile:
 
 
     def timeseries(self):
+        if self.precipitation_data_type == 'PRISM':  # We use file format for PRISM data
+            return
+
         self.file.write('[TIMESERIES]\n')
-        self.file.write(';;Name\tDate\tTime\tValue\n')
+        self.file.write(';;Name\t\tDate\t\tTime\t\tValue\n')
 
         if self.precipitation_data_type == 'PRISM':
             # Read PRISM csv data, format index as datetime
@@ -451,7 +509,7 @@ class InputFile:
         self.file.write('[REPORT]\n')
         self.file.write(';;Reporting Options\n')
 
-        report_params = {'INPUT': 'NO',
+        report_params = {'INPUT': 'YES',
                          'CONTROLS': 'NO',
                          'SUBCATCHMENTS': 'ALL',
                          'NODES': 'ALL',
@@ -524,12 +582,12 @@ class InputFile:
         self.xsections()
         self.timeseries()
         self.report()
-        self.tags()
-        self.map()
-        self.coordinates()
-        self.vertices()
-        self.polygons()
-        self.symbols()
+        # self.tags()
+        # self.map()
+        # self.coordinates()
+        # self.vertices()
+        # self.polygons()
+        # self.symbols()
         self.file.close()
 
 
@@ -582,43 +640,3 @@ class InputFile:
 
         data = data[['NAME', 'DATE', 'TIME', 'VALUE']]
         return data
-
-
-def main():
-    characteristics_file = '../data/input_file_data/Selected_BG_inputs_20191212.csv'
-    # characteristics_frame_debug = pd.read_csv(characteristics_file, skip_blank_lines=True, low_memory=False, dtype=str, nrows=5)  # Read the green infrastructure data to a pandas dataframe
-    characteristics_frame = pd.read_csv(characteristics_file, skip_blank_lines=True, low_memory=False, dtype=str)  # Read the green infrastructure data to a pandas dataframe
-
-    namespace = Manager().Namespace()
-    evaporation_data = pd.read_pickle('../data/input_file_data/evaporation_converted.pkl')
-    namespace.evap = evaporation_data
-
-    geoids = ['260810146022', '060375508003', '170319800001', '080310034021', '482019801001', '120110502083', '360470220002']
-
-    for geoid in tqdm(geoids):
-
-        row = characteristics_frame[characteristics_frame['GEOID10'] == geoid].iloc[0,:]
-
-        for sim_type in ['hourly', 'daily', 'prism']:
-            for lid_type in ['ng', 'rg', 'rb']:
-
-                out_dir = '../jupyter_notebooks/SWMM_Precipitation/' + sim_type + '/simulation_files/' + lid_type + '/'
-                out_file = out_dir + row['STATE'].lower() + '_' + lid_type + '_' + sim_type + '.inp'
-
-                if not os.path.exists(out_dir):
-                    print('Making', out_dir)
-                    os.makedirs(out_dir)
-
-                file = InputFile(row, out_file, namespace, lid_type)
-                if sim_type == 'prism':
-                    file.set_precipitation_data_type('PRISM')
-                else:
-                    file.set_precipitation_data_type('narr_' + sim_type)
-
-                file.set_start_date('01/01/2014')
-                file.set_end_date('12/31/2014')
-
-                file.write()
-
-if __name__ == '__main__':
-    main()
