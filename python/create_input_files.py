@@ -1,10 +1,5 @@
-import sys
-import os
 import pandas as pd
-from multiprocessing import Pool, Manager
 from pandarallel import pandarallel
-
-sys.path.insert(0, '../../python/')
 from create_input_file_class import InputFile
 
 
@@ -13,11 +8,11 @@ def main():
     num_processes = 4
 
     # Load the Block Group Characteristics Data
-    characteristics_file = '../input_file_data/Selected_BG_inputs_20191212.csv'
+    characteristics_file = '../data/input_file_data/Selected_BG_inputs_20191212.csv'
     characteristics_frame = pd.read_csv(characteristics_file, skip_blank_lines=True, low_memory=False, dtype=str)  # Read the green infrastructure data to a pandas dataframe
 
-    # Load the Evaporation Data, put into Manager
-    evaporation_data = pd.read_pickle('../input_file_data/evaporation_converted.pkl')
+    # Load the Evaporation Data
+    evaporation_data = pd.read_pickle('../data/input_file_data/evaporation_converted.pkl')
 
     # Initialize pandarallel
     pandarallel.initialize(nb_workers=num_processes, progress_bar=True, verbose=1, use_memory_fs=True)
@@ -31,7 +26,7 @@ def main():
 
 
 def create_input_file(row, evap, sim_type):
-    outfile = './no_green_infrastructure/' + row['GEOID10'] + '_ng.inp'
+    outfile = '../data/input_files/no_green_infrastructure/' + row['GEOID10'] + '_ng.inp'
     file = InputFile(row, outfile, evap, sim_type)
     file.set_start_date('01/01/1981')
     file.set_end_date('12/31/2014')
