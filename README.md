@@ -1,77 +1,68 @@
-# Computational Program for Racial Health Disparities - West Nile Virus - USA - Storm Water Management Model Tools
-# Setup
-## Directory Setup
+# West Nile Virus - USA - Storm Water Management Model 
+
+This repository contains code related to the [Computational Program for Racial Health Disparities'](https://wiki.ncsa.illinois.edu/display/CPRHD) 
+West Nile Virus USA project at the [National Center for Supercomputing Applications](http://www.ncsa.illinois.edu/). We create input files for the model using green infrastructure data, evaporation data, and precipitation data for ~150,000 census block groups across the United States.
+
+We then run these input files using a Python port of SWMM, [pyswmm](https://github.com/OpenWaterAnalytics/pyswmm), and extract the timeseries data using [swmmtoolbox](https://pypi.org/project/swmmtoolbox/).
+ 
+## Getting Started
+
+1) Clone the Repository
+2) [Download Requisite Files](https://uofi.app.box.com/folder/97076496992)
+    1) Selected_BG_inputs_20191212.csv - Contains block group characteristics
+    2) weather_data_swmm_format - Contains precipitation data, linked to the block groups by their PRISM ID
+    3) evaporation_converted.pkl - Pickled pandas array containing evaporation data for each GEOID10
+3) Place the files in /CPRHD_WNV_USA_SWMM/data/input_file_data/
+4) Run [create_input_files.py](https://github.com/ncsa/CPRHD_WNV_USA_SWMM/blob/master/python/create_input_files.py), specifying which LID type you want to create the files for (ng = No Green Infrastructure, rb = Rain Barrel, rg = Rain Garden)
+
+    
+### Prerequisites
+1) [PySWMM](https://github.com/OpenWaterAnalytics/pyswmm) - Running the Simulations
+2) [SWMMToolbox](https://pypi.org/project/swmmtoolbox/) - Extracting Timeseries Data
+3) [Pandarallel](https://github.com/nalepae/pandarallel) - Multiprocessing with pandas dataframes
 ```
-Project_base
-|   README.md
-|   swmm.py
-|   create_input_file.py
-|   extract_data.py
-|   US_FIPS_Codes.csv
-|   move_report_files.py
-└── data
-     └─── binary_csv
-          | .csv files
-     └─── input_file_data
-          | Selected_BG_inputs_20180208.csv (Group characteristics data)
-          └─── weather_data
-              | individual weather .csv files
-     └─── input_files
-          | .inp files
-     └─── report_files
-          | .rpt files
+pip install pyswmm
+pip install swmmtoolbox
+pip install pandarallel
 ```
 
-#### Legend: 
-   File: | 
+## Documentation
+### [create_input_file_class.py](https://github.com/ncsa/CPRHD_WNV_USA_SWMM/blob/master/python/create_input_file_class.py)
+#### Constructor
+
+    file = InputFile(row_of_characteristics_data, path_to_outfile, evaporation_data, sim_type)
+    
+Options for sim_type are 'ng', 'rb', or 'rg'.
+
+#### set_start_date
+Set the simulation start date (default 01/01/1981)
+    
+    file.set_start_date('01/01/2014')
    
-   Folder: └───
-  
-# Documentation 
-## Main Modules
-### [swmm.py](https://github.com/ncsa/CPRHD_WNV_USA_SWMM/blob/master/swmm.py)
-Using [pyswmm](https://github.com/OpenWaterAnalytics/pyswmm), this module converts .inp files to .out and .rpt files, then, using [swmmtoolbox](https://github.com/timcera/swmmtoolbox), extracts the data from the binary .out file and stores it in a .csv file.
-Make sure your file path is set up such that the .inp files are in ./data. There should also be a directory inside ./data with the path ./data/binary_csv.
+#### set_end_date
+Set the simulation end date (maximum/default is 12/31/2014)
 
+    file.set_end_date('01/31/2014')
+
+#### set_precipitation_data_type
+Set the precipitation data type (default is PRISM), choices are PRISM, narr_hourly, narr_daily.
+
+    file.set_precipitation_data_type('narr_hourly')
     
-### [create_input_file.py](https://github.com/ncsa/CPRHD_WNV_USA_SWMM/blob/master/create_input_file.py)
-This module creates an input file for the SWMM Model.
+#### get_sim_name
+Returns the LID Simulation Type
 
-## Supporting Modules
+    file = InputFile(row, outfile, evap, 'rg')
+    print(file.get_sim_name())
+    >> Rain Garden
 
+#### write
+This function writes every section of the input file used in our analysis
 
-### [extract_data.py](https://github.com/ncsa/CPRHD_WNV_USA_SWMM/blob/master/extract_data.py)
+    file.write()
+    >> (Input file has been created)
 
-#### process_output(output_file)
-This function extracts the data from the binary SWMM file and writes it to a [.csv file]((https://github.com/mataslauzadis/SWMM/blob/master/data/binary_csv/Chicago_U_NoGI.csv)).
-    
-    from extract_data import process_output
-    process_output('./data/input_files/Chicago_U_NoGI.inp') 
-    * Chicago_U_NoGI.csv has been created *
-    
-### [fips_converter.py](https://github.com/ncsa/CPRHD_WNV_USA_SWMM/blob/master/fips_converter.py)
-#### fips_to_dict()
-Using US_FIPS_Codes.csv, this function creates a dictionary with keys of state code and county code.
-
-Example: dictionary[state_code][county_code] will return a tuple containing the state name and county name.
-    
-    from fips_converter import fips_to_dict
-    dictionary = fips_to_dict()
-    dictionary[17][43] --> ['Illinois','Du Page']
-    
-#### fips_conversion(fips_code)
-This function accepts 12-digit GEOIDs and returns a list with the state name, county name, census tract ID, and census block group ID.
-
-    from fips_converter import fips_conversion 
-    fips_conversion(170438466033) --> ['Illinois', 'Du Page', '8466', '033']
-    
-
-
-    
-### [move_report_files.py](https://github.com/ncsa/CPRHD_WNV_USA_SWMM/blob/master/move_report_files.py)
-This module moves all .rpt files from ./data to ./data/report_files.
-
-### [netcdf.py](https://github.com/ncsa/CPRHD_WNV_USA_SWMM/blob/master/netcdf.py)
+### [netcdf.py](https://github.com/ncsa/CPRHD_WNV_USA_SWMM/blob/master/python/netcdf.py)
 This module is used to manipulate the NetCDF file provided by [NARR](https://www.esrl.noaa.gov/psd/data/gridded/data.narr.html) for obtaining evaporation rate data.
 #### netcdf_to_geotiff(netcdf_file, overwrite=False)
 This function accepts a directory to a NetCDF file, warps it to the North American Lambert Conformal Conic projection, and then extracts each band into an individual image. If overwrite is true (default false), it will overwrite existing extracted data.
@@ -79,12 +70,9 @@ This function accepts a directory to a NetCDF file, warps it to the North Americ
     from netcdf import netcdf_to_geotiff
     netcdf_to_geotiff('./path/to/file', overwrite=True)
     * GeoTIFF files have been created * 
+    
 #### create_evaporation_plot(geotiff_file, type='image')
 This function accepts a .geotiff file and creates either an image or a histogram (default is image).
-
-[Histogram](https://raw.githubusercontent.com/ncsa/CPRHD_WNV_USA_SWMM/master/docs/1999_03_histogram.png)
-
-[Image](https://raw.githubusercontent.com/ncsa/CPRHD_WNV_USA_SWMM/master/docs/1993_03_image.png)
     
     from netcdf import create_evaporation_plot
     create_evaporation_plot('./path/to/geotiff/file', type='histogram')
@@ -106,6 +94,11 @@ This function accepts a dataframe, and prints the average evaporation level acro
     dataframe = pd.read_pickle('./path/to/pickle/file')
     get_average_evaporation(dataframe)
 
-# About / Contact
-#### Worked on by [Matas Lauzadis](https://github.com/mataslauzadis) during Summer 2019's REU-INCLUSION for NCSA's [Computational Program for Racial Health Disparities](https://wiki.ncsa.illinois.edu/display/CPRHD).  
+## Authors
 
+* Matas Lauzadis - [GitHub](https://github.com/mataslauzadis)
+
+## Acknowledgments
+
+* [Aiman Soliman](https://aimansoliman.com/) - Mentor
+* [Liudmila Mainzer](https://ccbgm.illinois.edu/people/liudmila-sergeevna-mainzer/) - CPRHD Lead
