@@ -7,22 +7,30 @@ import geopandas as gpd  # For NARR Input File Creation
 import rasterstats as rs  # For NARR Input File Creation
 from tqdm import tqdm
 
-overwrite = True
-
 # No Green Infrastructure: https://docs.google.com/document/d/1_rnpjv8CfboOivYl6W7affA1tcGYJgd-x4SOpYENsFo/edit
 # Rain Garden: https://docs.google.com/document/d/1rpHAjt9MIGfQ17Wkbi4D-vHnY5gNW7pggtyGmI2G1RM/edit
 # Rain Barrel: https://docs.google.com/document/d/1Ur0nB_N8GKZwqgg1X6mtUibkHuTgYJ7tisg-DyexPRM/edit
+
+
+# Whether to replace existing input files or not
+overwrite = True
 
 # Define the absolute path to the Repository
 _repo_path = '/home/matas/Desktop/CPRHD_WNV_USA_SWMM/'
 
 
 class InputFile:
-    def __init__(self, row, outfile, namespace, sim_type='ng'):
-        self.sim_type = str(sim_type)
-        self.data = row
-        self.namespace = namespace
+    def __init__(self, row, outfile, evap_data, sim_type='ng'):
+        self.sim_type = str(sim_type)  # Simulation type (ng = No Gren Infrastructure, rb = Rain Barrel, rg = Rain Garden)
+        self.data = row  # Row of the block group characteristics spreadsheet
+        self.evap = evap_data  # Numpy array containing the row's evaporation data
 
+        # Make sure there is some evaporation data
+        assert(not self.evap.size() == 0)
+        # Make sure there is some block group characteristics data
+        assert(not self.data.size == 0)
+
+        # Make sure the file does not already exist
         if os.path.exists(outfile) and not overwrite:
             print('File already exists!', outfile)
             exit(1)
@@ -33,7 +41,7 @@ class InputFile:
         self.precipitation_data_type = 'PRISM'
 
         if self.sim_type == 'rb':
-            self.rb_type = 'subcatchment'
+            self.rb_type = 'subcatchment'  # other option is 'lid' but it's not working right now
 
 
     def set_rainbarrel_type(self, value):
@@ -129,9 +137,7 @@ class InputFile:
     def evaporation(self):
         self.file.write('[EVAPORATION]\n')
         self.file.write('MONTHLY\t')
-
-        evaporation_data = self.namespace.evap.loc[self.data['GEOID10']]
-        for value in evaporation_data[1:]:
+        for value in self.evap:
             self.file.write(str(value) + ' ')
         self.file.write('\nDRY_ONLY\tYES\n\n')
 
@@ -148,6 +154,8 @@ class InputFile:
                                           'Sta': self.data['PRISM_ID'],
                                           'Units': 'IN'
                                           }
+        # Check that the weather file exists
+        assert(os.path.exists(_repo_path + 'data/input_file_data/weather_data_swmm_format/' + self.data['PRISM_ID'] + '.txt'))
 
         raingage_parameters_timeseries = {'Name': 'RainGage2',  # name of raingage variable
                                           'Form': 'VOLUME',  # form of recorded rainfall
