@@ -65,7 +65,7 @@ This function writes every section of the input file used in our analysis
 ### [netcdf.py](https://github.com/ncsa/CPRHD_WNV_USA_SWMM/blob/master/python/netcdf.py)
 This module is used to manipulate the NetCDF file provided by [NARR](https://www.esrl.noaa.gov/psd/data/gridded/data.narr.html) for obtaining evaporation rate data.
 #### netcdf_to_geotiff(netcdf_file, overwrite=False)
-This function accepts a directory to a NetCDF file, warps it to the North American Lambert Conformal Conic projection, and then extracts each band into an individual image. If overwrite is true (default false), it will overwrite existing extracted data.
+This function accepts a directory to a NetCDF file, warps it to the North American Lambert Conformal Conic projection, and then extracts each band into an individual GeoTIFF. If overwrite is true (default false), it will overwrite existing extracted files.
 
     from netcdf import netcdf_to_geotiff
     netcdf_to_geotiff('./path/to/file', overwrite=True)
@@ -79,7 +79,7 @@ This function accepts a .geotiff file and creates either an image or a histogram
     * A histogram has been created * 
 
 #### extract_evaporation_data(geotiff_files)
-This function accepts a list of .geotiff files (obtained with glob), and iterates through each, adding its data to a dataframe. The dataframe is then pickled and stored in a file for later access.
+This function accepts a list of .geotiff files, and iterates through each, adding its data to a dataframe. The dataframe is then pickled and stored in a file for later access.
     
     from netcdf import extract_evaporation_data
     geotiff_files = glob.glob('./path/to/files/*.geotiff')
@@ -87,7 +87,7 @@ This function accepts a list of .geotiff files (obtained with glob), and iterate
     * A pickle file has been created *
   
 #### get_average_evaporation(dataframe)
-This function accepts a dataframe, and prints the average evaporation level across all years.
+This function accepts a dataframe (generated in extracted_evaporation_data), and prints the average evaporation rate across all years.
     
     from netcdf import get_average_evaporation
     import pandas as pd
@@ -101,4 +101,4 @@ This function accepts a dataframe, and prints the average evaporation level acro
 ## Acknowledgments
 
 * [Aiman Soliman](https://aimansoliman.com/) - Mentor
-* [Liudmila Mainzer](https://ccbgm.illinois.edu/people/liudmila-sergeevna-mainzer/) - CPRHD Lead
+* [Liudmila Mainzer](https://ccbgm.illinois.edu/people/liudmila-sergeevna-mainzer/) - CPRHD, Genomics Lead
