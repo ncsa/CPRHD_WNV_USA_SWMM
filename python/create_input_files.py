@@ -1,6 +1,6 @@
 import pandas as pd
 from pandarallel import pandarallel
-from create_input_file_class import InputFile
+from InputFile import InputFile
 
 
 def main():
@@ -26,11 +26,14 @@ def main():
 
 
 def create_input_file(row, evap, sim_type):
-    outfile = '../data/input_files/no_green_infrastructure/' + row['GEOID10'] + '_ng.inp'
+    out_dir = './test/'
+
+    outfile = out_dir + row['GEOID10'] + '_' + sim_type + '.inp'
     file = InputFile(row, outfile, evap, sim_type)
     file.set_start_date('01/01/1981')
     file.set_end_date('12/31/2014')
     file.set_precipitation_data_type('PRISM')
+
     file.write()
     return
 

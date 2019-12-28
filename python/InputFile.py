@@ -36,11 +36,15 @@ class InputFile:
         self.file = open(outfile, 'w')
         self.start = '01/01/1981'
         self.end = '12/31/2014'
-        self.precipitation_data_type = 'PRISM'
+        self.precipitation_data_type = 'PRISM'  # other options are narr_daily, narr_hourly
+        self.evaporation_type = 'monthly' # other option is 'average'
 
         if self.sim_type == 'rb':
             self.rb_type = 'subcatchment'  # other option is 'lid' but it's not working right now
 
+
+    def set_evaporation_type(self, value):
+        self.evaporation_type = value
 
     def set_rainbarrel_type(self, value):
         self.rb_type = value
@@ -134,10 +138,14 @@ class InputFile:
 
     def evaporation(self):
         self.file.write('[EVAPORATION]\n')
-        self.file.write('MONTHLY\t')
-        for value in self.evap.values:
-            self.file.write(str(value) + ' ')
-        self.file.write('\nDRY_ONLY\tYES\n\n')
+
+        if self.evaporation_type == 'monthly':
+            self.file.write('TIMESERIES\t' + self.data['GEOID10'] + '_EVAP\n')
+            self.file.write('\nDRY_ONLY\tYES\n\n')
+        else: # Code for Average Monthly Evaporation
+            self.file.write('MONTHLY\t')
+            for value in self.evap.values:
+                self.file.write(str(value) + ' ')
 
 
     def raingages(self):
@@ -475,48 +483,32 @@ class InputFile:
 
 
     def timeseries(self):
-        if self.precipitation_data_type == 'PRISM':  # We use file format for PRISM data
-            return
-
         self.file.write('[TIMESERIES]\n')
         self.file.write(';;Name\t\tDate\t\tTime\t\tValue\n')
 
-        if self.precipitation_data_type == 'PRISM':
-            # Read PRISM csv data, format index as datetime
-            precipitation_data = pd.read_csv('/home/matas/Desktop/CPRHD_WNV_USA_SWMM/data/input_file_data/weather_data/' + self.data['PRISM_ID'] + '.csv', header=None).set_index(0, drop=True)
-            precipitation_data.index = pd.to_datetime(precipitation_data.index).strftime('%m/%d/%Y')
+        # Monthly Evaporation Data
+        if self.evaporation_type ==  'monthly':
+            evap_frame = self.evap.to_frame('VALUE')
+            evap_frame['NAME'] = self.data['GEOID10'] + '_EVAP'
+            evap_frame['TIME'] = '00:00:00'
+            evap_frame['DATE'] = evap_frame.index.strftime('%m/%d/%Y')
+            evap_frame = evap_frame[['NAME', 'DATE', 'TIME', 'VALUE']]
+            evap_frame.to_csv(self.file, sep='\t', index=False, header=None)
+            self.file.write('\n')
 
-            date_range = pd.date_range(self.start, self.end)
+        # NARR Precipitation Data
+        if self.precipitation_data_type[:5] == 'narr':
+            if self.precipitation_data_type == 'narr_hourly':
+                masked_geotiffs = glob.glob('../data/input_file_data/narr_masked_geotiffs/hourly/*.geotiff')
+            if self.precipitation_data_type == 'narr_daily':
+                masked_geotiffs = glob.glob('../data/input_file_data/narr_masked_geotiffs/daily/*.geotiff')
+            shape_file = '../data/input_file_data/SelectBG_all_land_BGID_final.gpkg'
+            # data = self.get_narr_precipitation_data(shape_file, masked_geotiffs)  # Uncomment to calculate the data on the fly
 
-            # Format date and time for SWMM format
-            date = date_range.strftime('%m/%d/%Y')
-            time = date_range.strftime('%H:%M:%S').to_frame().set_index(date, drop=True)
-
-            # Join with time dataframe, drop na values (values outside of our start and end range)
-            precipitation_data = precipitation_data.join(time)
-            precipitation_data.dropna(axis=0, inplace=True)
-            precipitation_data = precipitation_data.reset_index()
-
-            # Reorder columns
-            precipitation_data['NAME'] = self.data['PRISM_ID']
-            precipitation_data = precipitation_data.rename(columns={1: 'VALUE', 0: 'TIME', 'index':'DATE'})
-            precipitation_data = precipitation_data[['NAME', 'DATE', 'TIME', 'VALUE']]
-
-            # Write to file
-            precipitation_data.to_csv(self.file, sep='\t', index=False, header=None)
-            self.file.write('\n\n')
-            return
-
-        elif self.precipitation_data_type == 'narr_hourly':
-            masked_geotiffs = glob.glob('../data/input_file_data/narr_masked_geotiffs/hourly/*.geotiff')
-        elif self.precipitation_data_type == 'narr_daily':
-            masked_geotiffs = glob.glob('../data/input_file_data/narr_masked_geotiffs/daily/*.geotiff')
-        shape_file = '../data/input_file_data/SelectBG_all_land_BGID_final.gpkg'
-        # data = self.get_narr_precipitation_data(shape_file, masked_geotiffs)
-
-        data = pd.read_pickle('/home/matas/Desktop/CPRHD_WNV_USA_SWMM/jupyter_notebooks/SWMM_Precipitation/' + self.precipitation_data_type[5:] + '/timeseries/' + self.data['STATE'].lower() + '.pkl')
-        data.to_csv(self.file, sep='\t', index=False, header=None)
-        self.file.write('\n')
+            # The NARR data has been pre-calculated for the 7 block groups we have been considering
+            data = pd.read_pickle('/home/matas/Desktop/CPRHD_WNV_USA_SWMM/jupyter_notebooks/SWMM_Precipitation/' + self.precipitation_data_type[5:] + '/timeseries/' + self.data['STATE'].lower() + '.pkl')
+            data.to_csv(self.file, sep='\t', index=False, header=None)
+            self.file.write('\n')
 
 
     def report(self):
@@ -538,50 +530,6 @@ class InputFile:
         self.file.write('\n\n')
 
 
-    def tags(self):
-        # This is not used from what I can tell
-        self.file.write('[TAGS]\n\n')
-
-
-    def map(self):
-        self.file.write('[MAP]\n')
-        map_params = {'X1': '10000000000.000',
-                      'X2': '10000000000.000',
-                      'Y1': '-10000000000.000',
-                      'Y2': '-10000000000.000'
-                     }
-
-        self.file.write('DIMENSIONS\t')
-        for val in map_params:
-            self.file.write(map_params[val] + '\t')
-        self.file.write('\n')
-        self.file.write('Units\tNone\n\n')
-
-
-    def coordinates(self):
-        # This is not used from what I can tell
-        self.file.write('[COORDINATES]\n')
-        self.file.write(';;Node\tX-Coord\tY-Coord\n\n')
-
-
-    def vertices(self):
-        # This is not used from what I can tell
-        self.file.write('[VERTICES]\n')
-        self.file.write(';;Link\tX-Coord\tY-Coord\n\n')
-
-
-    def polygons(self):
-        # This is not used from what I can tell
-        self.file.write('[POLYGONS]\n')
-        self.file.write(';;Subcatchment\tX-Coord\tY-Coord\n\n')
-
-
-    def symbols(self):
-        # This is not used from what I can tell
-        self.file.write('[SYMBOLS]\n')
-        self.file.write(';;Gage\tX-Coord\tY-Coord\n\n')
-
-
     def write(self):
         self.title()
         self.options()
@@ -599,12 +547,6 @@ class InputFile:
         self.xsections()
         self.timeseries()
         self.report()
-        # self.tags()
-        # self.map()
-        # self.coordinates()
-        # self.vertices()
-        # self.polygons()
-        # self.symbols()
         self.file.close()
 
 
