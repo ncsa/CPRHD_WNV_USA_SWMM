@@ -1,5 +1,5 @@
 import pandas as pd
-from pandarallel import pandarallel
+from pandarallel import pandarallel  # Multiprocessing a pandas DataFrame
 from InputFile import InputFile
 
 
@@ -26,14 +26,9 @@ def main():
 
 
 def create_input_file(row, evap, sim_type):
-    out_dir = './test/'
-
+    out_dir = '/home/matas/Desktop/all_input_files/ng/'
     outfile = out_dir + row['GEOID10'] + '_' + sim_type + '.inp'
     file = InputFile(row, outfile, evap, sim_type)
-    file.set_start_date('01/01/1981')
-    file.set_end_date('12/31/2014')
-    file.set_precipitation_data_type('PRISM')
-
     file.write()
     return
 

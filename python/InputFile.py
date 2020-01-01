@@ -1,11 +1,8 @@
 import os
-import sys
 import pandas as pd
-from multiprocessing import Manager
 import glob
-import geopandas as gpd  # For NARR Input File Creation
-import rasterstats as rs  # For NARR Input File Creation
-from tqdm import tqdm
+import geopandas as gpd  # For NARR Precipitation Data
+import rasterstats as rs  # For NARR Precipitation Data
 
 # No Green Infrastructure: https://docs.google.com/document/d/1_rnpjv8CfboOivYl6W7affA1tcGYJgd-x4SOpYENsFo/edit
 # Rain Garden: https://docs.google.com/document/d/1rpHAjt9MIGfQ17Wkbi4D-vHnY5gNW7pggtyGmI2G1RM/edit
@@ -15,15 +12,15 @@ from tqdm import tqdm
 # Whether to replace existing input files or not
 overwrite = True
 
-# Define the absolute path to the Repository
+# Define the absolute path to the Repository (used for path to SWMM Precipitation Files)
 _repo_path = '/home/matas/Desktop/CPRHD_WNV_USA_SWMM/'
 
 
 class InputFile:
     def __init__(self, row, outfile, evap_data, sim_type='ng'):
-        self.sim_type = str(sim_type)  # Simulation type (ng = No Gren Infrastructure, rb = Rain Barrel, rg = Rain Garden)
+        self.sim_type = str(sim_type)  # Simulation type (ng = No Green Infrastructure, rb = Rain Barrel, rg = Rain Garden)
         self.data = row  # Row of the block group characteristics spreadsheet
-        self.evap = evap_data  # Numpy array containing the row's evaporation data
+        self.evap = evap_data  # Numpy array containing the GEOID's evaporation data
 
         # Make sure there is some evaporation data
         assert not self.evap.size == 0, 'No Evaporation Data Found for GEOID ' + self.data['GEOID10']
@@ -37,14 +34,15 @@ class InputFile:
         self.start = '01/01/1981'
         self.end = '12/31/2014'
         self.precipitation_data_type = 'PRISM'  # other options are narr_daily, narr_hourly
-        self.evaporation_type = 'monthly' # other option is 'average'
+        self.evaporation_type = 'monthly'  # other option is 'average'
 
         if self.sim_type == 'rb':
-            self.rb_type = 'subcatchment'  # other option is 'lid' but it's not working right now
+            self.rb_type = 'subcatchment'  # other option is 'lid', using LID Controls instead of subcatchment
 
 
     def set_evaporation_type(self, value):
         self.evaporation_type = value
+
 
     def set_rainbarrel_type(self, value):
         self.rb_type = value
@@ -567,7 +565,7 @@ class InputFile:
         frame = frame[['GEOID10', name]]
 
         # loop through all the GeoTIFFs and join onto the original frame
-        for file in tqdm(masked_geotiffs[1:]):
+        for file in masked_geotiffs[1:]:
             name = file[file.rfind('/') + 1:file.rfind('.')]
             stats = rs.zonal_stats(shape, file, stats=output_stats, all_touched=True)
             sub_frame = pd.DataFrame.from_dict(stats)
