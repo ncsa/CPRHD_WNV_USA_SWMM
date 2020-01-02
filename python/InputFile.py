@@ -96,12 +96,12 @@ class InputFile:
                            #'REPORT_START_DATE': self.start,  # Default
                            #'REPORT_START_TIME': '00:00:00',  # Default
                            'END_DATE': self.end,
-                           'END_TIME': '24:00:00',
-                           'SWEEP_START': self.start[:-5],
-                           'SWEEP_END': self.end[:-5] + '\n',
+                           'END_TIME': '23:59:59',
+                           #'SWEEP_START': self.start[:-5],  # Default
+                           #'SWEEP_END': self.end[:-5] + '\n',  # Default
 
                            #'DRY_DAYS': '0',  # Default
-                           'REPORT_STEP': '24:00:00',
+                           'REPORT_STEP': '01:00:00',
                            'WET_STEP': '00:06:00',
                            'DRY_STEP': '00:06:00',
                            'ROUTING_STEP': '00:01:00\n',
@@ -118,7 +118,7 @@ class InputFile:
                            #'LAT_FLOW_TOL': '5',  # Default
                            #'MINIMUM_STEP': '0.5',  # DEfault
                            #'THREADS': '1',  # Default
-                           'IGNORE_ROUTING': 'YES'  # Ignore's routing information and just gets runoff data
+                           # 'IGNORE_ROUTING': 'YES'  # Ignores routing information and just gets runoff data
                            }
 
         for key, value in optionVariables.items():
@@ -263,9 +263,10 @@ class InputFile:
                               'Rough': '0',  # Manning's n (EPA Manual recommends 0)
                               'Slope': '0',  # Slope of the surface (EPA Manual recommends 0)
                               'Xslope': '0'}  # Slope of side walls of vegetative swale (EPA Manual recommends 0)
-            self.file.write(
-                'RainGarden\tSURFACE\t' + surface_params['StorHt'] + '\t' + surface_params['VegFrac'] + '\t' +
-                surface_params['Rough'] + '\t' + surface_params['Slope'] + '\t' + surface_params['Xslope'] + '\n')
+            self.file.write('RainGarden\tSURFACE\t')
+            for key in surface_params:
+                self.file.write(surface_params[key] + '\t')
+            self.file.write('\n')
 
             # SOIL
             soil_params = {'Thick': '12',  # thickness of soil layer (inches)
@@ -276,10 +277,11 @@ class InputFile:
                            'Kcoeff': self.data['RG1_Ks_SLOPE'], # slope of the curve of log(conductivity) vs. soil moisture content
                            'Suct': self.data['RG1_SH']  # soil capillary suction (inches)
                            }
-            self.file.write(
-                'RainGarden\tSOIL\t' + soil_params['Thick'] + '\t' + soil_params['Por'] + '\t' + soil_params[
-                    'FC'] + '\t' + soil_params['WP'] + '\t' + soil_params['Ksat'] + '\t' + soil_params[
-                    'Kcoeff'] + '\t' + soil_params['Suct'] + '\n')
+            self.file.write('RainGarden\tSOIL\t')
+            for key in soil_params:
+                self.file.write(soil_params[key] + '\t')
+            self.file.write('\n')
+
 
             # STORAGE
             storage_params = {'Height': '0',  # height of the rain garden (inches)
@@ -287,9 +289,11 @@ class InputFile:
                               'Seepage': self.data['RG1_SEEPAGE'],
                               # rate at which water seeps from the layer into the underlying layer
                               'Vclog': '0'}  # number of void volumes of runoff it takes to clog (use 0 to ignore clogging)
-            self.file.write(
-                'RainGarden\tSTORAGE\t' + storage_params['Height'] + '\t' + storage_params['Vratio'] + '\t' +
-                storage_params['Seepage'] + '\t' + storage_params['Vclog'] + '\n')
+            self.file.write('RainGarden\tSTORAGE\t')
+            for key in storage_params:
+                self.file.write(storage_params[key] + '\t')
+            self.file.write('\n')
+
 
         elif self.sim_type == 'rb' and self.rb_type == 'lid':  # LID Control for Rain Barrel
             self.file.write('RainBarrel\tRB\n')
