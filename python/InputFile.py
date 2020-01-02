@@ -12,7 +12,7 @@ import rasterstats as rs  # For NARR Precipitation Data
 # Whether to replace existing input files or not
 overwrite = True
 
-# Define the absolute path to the Repository (used for path to SWMM Precipitation Files)
+# Define the absolute path to the Repository (used for path to precipitation and evaporation files)
 _repo_path = '/home/matas/Desktop/CPRHD_WNV_USA_SWMM/'
 
 
@@ -34,7 +34,7 @@ class InputFile:
         self.start = '01/01/1981'
         self.end = '12/31/2014'
         self.precipitation_data_type = 'PRISM'  # other options are narr_daily, narr_hourly
-        self.evaporation_type = 'monthly'  # other option is 'average'
+        self.evaporation_type = 'file'  # other option is 'average'
 
         if self.sim_type == 'rb':
             self.rb_type = 'subcatchment'  # other option is 'lid', using LID Controls instead of subcatchment
@@ -137,13 +137,18 @@ class InputFile:
     def evaporation(self):
         self.file.write('[EVAPORATION]\n')
 
-        if self.evaporation_type == 'monthly':
-            self.file.write('TIMESERIES\t' + self.data['GEOID10'] + '_EVAP\n')
-            self.file.write('\nDRY_ONLY\tYES\n\n')
-        else: # Code for Average Monthly Evaporation
+        if self.evaporation_type == 'file':  # Monthly Evaporation in an External Timeseries File
+            assert os.path.exists(_repo_path + 'data/input_file_data/evaporation_data_timeseries/' + self.data['GEOID10'] + '_EVAP.txt'), 'Failed to find external evaporation file'
+            self.file.write('TIMESERIES ' + self.data['GEOID10'] + '_EVAP\n')
+
+        elif self.evaporation_type == 'average':  # Code for Average Monthly Evaporation
             self.file.write('MONTHLY\t')
             for value in self.evap.values:
                 self.file.write(str(value) + ' ')
+            self.file.write('\n')
+        else:
+            raise Exception('Failed to parse evaporation type!')
+        self.file.write('DRY_ONLY\tYES\n')
 
 
     def raingages(self):
@@ -158,8 +163,6 @@ class InputFile:
                                           'Sta': self.data['PRISM_ID'],
                                           'Units': 'IN'
                                           }
-        # Check that the weather file exists
-        assert os.path.exists(_repo_path + 'data/input_file_data/weather_data_swmm_format/' + self.data['PRISM_ID'] + '.txt'), 'Failed to find external weather file'
 
         raingage_parameters_timeseries = {'Name': 'RainGage2',  # name of raingage variable
                                           'Form': 'VOLUME',  # form of recorded rainfall
@@ -170,11 +173,15 @@ class InputFile:
         if self.precipitation_data_type == 'narr_hourly':
             raingage_parameters_timeseries['Interval'] = '03:00:00'
 
-        if self.precipitation_data_type == 'PRISM':
+        if self.precipitation_data_type == 'PRISM': # Use External File for Data Input
+            # Check that the precipitation file exists
+            assert os.path.exists(_repo_path + 'data/input_file_data/weather_data_swmm_format/' + self.data['PRISM_ID'] + '.txt'), 'Failed to find external weather file'
+
             for key in raingage_parameters_file:
                 self.file.write(raingage_parameters_file[key] + '\t')
             self.file.write('\n\n')
-        else:
+
+        else:  # Data will be written in [TIMESERIES] Section
             for key in raingage_parameters_timeseries:
                 self.file.write(raingage_parameters_timeseries[key] + '\t')
             self.file.write('\n\n')
@@ -246,6 +253,7 @@ class InputFile:
         # Define the LID parameters for Rain Garden, Rain Barrel
         self.file.write('[LID_CONTROLS]\n')
         self.file.write(';;Name\tType\tParameters\n')
+
         if self.sim_type == 'rg':  # LID Control for Rain Garden
             self.file.write('RainGarden\tBC\n')
 
@@ -303,10 +311,10 @@ class InputFile:
             # DRAIN
             drain_params = {'Coeff': '0',  # rate of flow through drain as a function of height of water to drain bottom
                             'Expon': '0.5',  # rate of flow through the drain as a function of height of water to drain outlet
-                            'Offset': '6',  # height of the drain line above the bottom of the rain barrel
+                            'Offset': '0',  # height of the drain line above the bottom of the rain barrel
                             'Delay': '0',  # number of dry weather hours that elapse before drain line is opened
-                            'Unknown_Var': '0',
-                            'Unknown_Var2': '0'
+                            # 'Unknown_Var': '0',
+                            # 'Unknown_Var2': '0'
                             }
 
             self.file.write('RainBarrel\tDRAIN\t')
@@ -344,7 +352,7 @@ class InputFile:
                                 'LID': 'RainBarrel',  # Name of LID Control (defined above)
                                 # 'Number': '1',
                                 'Number': self.data['NUM_RB_INTEGER'],  # Number of units
-                                # 'Area': self.data['RB_treated_ISA_SQRM'],  # Area of each replicate unit
+                                # 'Area': self.data['RB_STORE_SQRFT'],  # Area of each replicate unit
                                 'Area': '500',
                                 'Width': '0',  # Recommended 0 for Bio-retention cells, Rain Gardens, Rain Barrels
                                 'InitSat': '0',  # Initial saturation of soil
@@ -484,15 +492,9 @@ class InputFile:
         self.file.write('[TIMESERIES]\n')
         self.file.write(';;Name\t\tDate\t\tTime\t\tValue\n')
 
-        # Monthly Evaporation Data
-        if self.evaporation_type ==  'monthly':
-            evap_frame = self.evap.to_frame('VALUE')
-            evap_frame['NAME'] = self.data['GEOID10'] + '_EVAP'
-            evap_frame['TIME'] = '00:00:00'
-            evap_frame['DATE'] = evap_frame.index.strftime('%m/%d/%Y')
-            evap_frame = evap_frame[['NAME', 'DATE', 'TIME', 'VALUE']]
-            evap_frame.to_csv(self.file, sep='\t', index=False, header=None)
-            self.file.write('\n')
+        # File Evaporation Data
+        if self.evaporation_type == 'file':
+            self.file.write(self.data['GEOID10'] + '_EVAP ' + 'FILE ' + _repo_path + 'data/input_file_data/evaporation_data_timeseries/' + self.data['GEOID10'] + '_EVAP.txt\n')
 
         # NARR Precipitation Data
         if self.precipitation_data_type[:5] == 'narr':
@@ -507,6 +509,7 @@ class InputFile:
             data = pd.read_pickle('/home/matas/Desktop/CPRHD_WNV_USA_SWMM/jupyter_notebooks/SWMM_Precipitation/' + self.precipitation_data_type[5:] + '/timeseries/' + self.data['STATE'].lower() + '.pkl')
             data.to_csv(self.file, sep='\t', index=False, header=None)
             self.file.write('\n')
+        self.file.write('\n')
 
 
     def report(self):
