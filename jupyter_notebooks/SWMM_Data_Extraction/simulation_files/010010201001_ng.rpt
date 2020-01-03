@@ -69,9 +69,9 @@
     Water Quality .......... NO
   Infiltration Method ...... GREEN_AMPT
   Starting Date ............ 01/01/1981 00:00:00
-  Ending Date .............. 12/31/2014 00:00:00
+  Ending Date .............. 12/31/2014 23:59:59
   Antecedent Dry Days ...... 0.0
-  Report Time Step ......... 00:00:00
+  Report Time Step ......... 01:00:00
   Wet Time Step ............ 00:06:00
   Dry Time Step ............ 00:06:00
   
@@ -99,6 +99,6 @@
   Subcatch1               1790.00       0.00      11.65    1557.33     220.89       0.00     220.89     2670.45    14.07   0.123
   
 
-  Analysis begun on:  Thu Jan  2 18:35:37 2020
-  Analysis ended on:  Thu Jan  2 18:35:40 2020
-  Total elapsed time: 00:00:03
+  Analysis begun on:  Fri Jan  3 12:17:57 2020
+  Analysis ended on:  Fri Jan  3 12:17:59 2020
+  Total elapsed time: 00:00:02

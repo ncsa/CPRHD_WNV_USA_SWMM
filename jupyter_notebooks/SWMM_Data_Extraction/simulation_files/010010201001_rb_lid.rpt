@@ -78,9 +78,9 @@
     Water Quality .......... NO
   Infiltration Method ...... GREEN_AMPT
   Starting Date ............ 01/01/1981 00:00:00
-  Ending Date .............. 12/31/2014 00:00:00
+  Ending Date .............. 12/31/2014 23:59:59
   Antecedent Dry Days ...... 0.0
-  Report Time Step ......... 00:00:00
+  Report Time Step ......... 01:00:00
   Wet Time Step ............ 00:06:00
   Dry Time Step ............ 00:06:00
   
@@ -119,6 +119,6 @@
   --------------------------------------------------------------------------------------------------------------------
   Subcatch1         RainBarrel         3370.45      0.00      0.00   3322.45      0.00      0.00     48.00       -0.00
 
-  Analysis begun on:  Thu Jan  2 18:35:32 2020
-  Analysis ended on:  Thu Jan  2 18:35:35 2020
+  Analysis begun on:  Fri Jan  3 12:17:52 2020
+  Analysis ended on:  Fri Jan  3 12:17:55 2020
   Total elapsed time: 00:00:03

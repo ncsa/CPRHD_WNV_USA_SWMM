@@ -90,9 +90,9 @@
   Infiltration Method ...... GREEN_AMPT
   Flow Routing Method ...... KINWAVE
   Starting Date ............ 01/01/1981 00:00:00
-  Ending Date .............. 12/31/2014 00:00:00
+  Ending Date .............. 12/31/2014 23:59:59
   Antecedent Dry Days ...... 0.0
-  Report Time Step ......... 00:00:00
+  Report Time Step ......... 01:00:00
   Wet Time Step ............ 00:06:00
   Dry Time Step ............ 00:06:00
   Routing Time Step ........ 60.00 sec
@@ -139,6 +139,6 @@
   Subcatch4               1790.00       0.00      91.33       0.00    1699.09       0.00    1699.09     1432.89     7.55   0.949
   
 
-  Analysis begun on:  Thu Jan  2 18:35:35 2020
-  Analysis ended on:  Thu Jan  2 18:35:37 2020
+  Analysis begun on:  Fri Jan  3 12:17:55 2020
+  Analysis ended on:  Fri Jan  3 12:17:57 2020
   Total elapsed time: 00:00:02

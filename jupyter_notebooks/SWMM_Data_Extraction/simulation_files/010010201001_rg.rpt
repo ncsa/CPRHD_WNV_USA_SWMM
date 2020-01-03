@@ -78,9 +78,9 @@
     Water Quality .......... NO
   Infiltration Method ...... GREEN_AMPT
   Starting Date ............ 01/01/1981 00:00:00
-  Ending Date .............. 12/31/2014 00:00:00
+  Ending Date .............. 12/31/2014 23:59:59
   Antecedent Dry Days ...... 0.0
-  Report Time Step ......... 00:00:00
+  Report Time Step ......... 01:00:00
   Wet Time Step ............ 00:06:00
   Dry Time Step ............ 00:06:00
   
@@ -120,6 +120,6 @@
   --------------------------------------------------------------------------------------------------------------------
   Subcatch1         RainGarden        10286.99    865.74   9412.14      6.46      0.00      1.20      3.85       -0.00
 
-  Analysis begun on:  Thu Jan  2 18:35:40 2020
-  Analysis ended on:  Thu Jan  2 18:35:42 2020
-  Total elapsed time: 00:00:02
+  Analysis begun on:  Fri Jan  3 12:17:59 2020
+  Analysis ended on:  Fri Jan  3 12:18:02 2020
+  Total elapsed time: 00:00:03
