@@ -1,0 +1,104 @@
+
+  EPA STORM WATER MANAGEMENT MODEL - VERSION 5.1 (Build 5.3.0.dev0)
+  --------------------------------------------------------------
+
+  
+  *************
+  Element Count
+  *************
+  Number of rain gages ...... 1
+  Number of subcatchments ... 1
+  Number of nodes ........... 1
+  Number of links ........... 0
+  Number of pollutants ...... 0
+  Number of land uses ....... 0
+  
+  
+  ****************
+  Raingage Summary
+  ****************
+                                                      Data       Recording
+  Name                 Data Source                    Type       Interval 
+  ------------------------------------------------------------------------
+  RainGage2            /home/matas/Desktop/CPRHD_WNV_USA_SWMM/data/input_file_data/weather_data_swmm_format/P_425566.txt
+  
+  
+  ********************
+  Subcatchment Summary
+  ********************
+  Name                       Area     Width   %Imperv    %Slope Rain Gage            Outlet              
+  -----------------------------------------------------------------------------------------------------------
+  Subcatch1                445.23 129295.89     13.00    9.1160 RainGage2            Outfall1            
+  
+  
+  ************
+  Node Summary
+  ************
+                                           Invert      Max.    Ponded    External
+  Name                 Type                 Elev.     Depth      Area    Inflow  
+  -------------------------------------------------------------------------------
+  Outfall1             OUTFALL               0.00      0.00       0.0
+  
+  
+  
+  *********************
+  Rainfall File Summary
+  *********************
+  Station    First        Last         Recording   Periods    Periods    Periods
+  ID         Date         Date         Frequency  w/Precip    Missing    Malfunc.
+  -------------------------------------------------------------------------------
+  P_425566   01/01/1981   12/31/2014    1440 min     12418          0          0
+
+  
+  *********************************************************
+  NOTE: The summary statistics displayed in this report are
+  based on results found at every computational time step,  
+  not just on results from each reporting time step.
+  *********************************************************
+  
+  ****************
+  Analysis Options
+  ****************
+  Flow Units ............... CFS
+  Process Models:
+    Rainfall/Runoff ........ YES
+    RDII ................... NO
+    Snowmelt ............... NO
+    Groundwater ............ NO
+    Flow Routing ........... NO
+    Water Quality .......... NO
+  Infiltration Method ...... GREEN_AMPT
+  Starting Date ............ 01/01/1981 00:00:00
+  Ending Date .............. 12/31/2014 00:00:00
+  Antecedent Dry Days ...... 0.0
+  Report Time Step ......... 00:00:00
+  Wet Time Step ............ 00:06:00
+  Dry Time Step ............ 00:06:00
+  
+  
+  **************************        Volume         Depth
+  Runoff Quantity Continuity     acre-feet        inches
+  **************************     ---------       -------
+  Total Precipitation ......     66414.172      1790.004
+  Evaporation Loss .........       432.404        11.654
+  Infiltration Loss ........     57781.325      1557.330
+  Surface Runoff ...........      8195.562       220.888
+  Final Storage ............         0.000         0.000
+  Continuity Error (%) .....         0.007
+  
+  
+  ***************************
+  Subcatchment Runoff Summary
+  ***************************
+  
+  ------------------------------------------------------------------------------------------------------------------------------
+                            Total      Total      Total      Total     Imperv       Perv      Total       Total     Peak  Runoff
+                           Precip      Runon       Evap      Infil     Runoff     Runoff     Runoff      Runoff   Runoff   Coeff
+  Subcatchment                 in         in         in         in         in         in         in    10^6 gal      CFS
+  ------------------------------------------------------------------------------------------------------------------------------
+  Subcatch1               1790.00       0.00      11.65    1557.33     220.89       0.00     220.89     2670.45    14.07   0.123
+  
+
+  Analysis begun on:  Thu Jan  2 18:35:37 2020
+  Analysis ended on:  Thu Jan  2 18:35:40 2020
+  Total elapsed time: 00:00:03
