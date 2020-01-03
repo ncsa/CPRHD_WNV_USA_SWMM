@@ -1,0 +1,61 @@
+[TITLE]
+;; No Green Infrastructure
+;; 010010201001 Alabama, Autauga County
+;; Tract: 0201	Block Group: 001
+
+[OPTIONS]
+INFILTRATION		GREEN_AMPT
+START_DATE		01/01/1981
+END_DATE		12/31/2014
+END_TIME		23:59:59
+REPORT_STEP		01:00:00
+WET_STEP		00:06:00
+DRY_STEP		00:06:00
+ROUTING_STEP		00:01:00
+
+INERTIAL_DAMPING	PARTIAL
+VARIABLE_STEP		0.75
+IGNORE_ROUTING		YES
+
+[EVAPORATION]
+TIMESERIES 010010201001_EVAP
+DRY_ONLY	YES
+[RAINGAGES]
+;;Name	Format	Interval	SCF	Source
+RainGage2	VOLUME	24:00:00	1.0	FILE /home/matas/Desktop/CPRHD_WNV_USA_SWMM/data/input_file_data/weather_data_swmm_format/P_425566.txt	P_425566	IN	
+
+[SUBCATCHMENTS]
+;;Name	Rain_Gage	Outlet	Area	%Imperv	Width	%Slope	CurbLen	SnowPack
+Subcatch1	RainGage2	Outfall1	445.233789002686	12.9985014985015	129295.89232638	9.11595058441162	0
+
+[SUBAREAS]
+;;Subcatch	N-Imperv	N-Perv	S-Imperv	S-Perv	PctZero	RouteTo	PctRouted
+Subcatch1	0.01	.341582413292226	0.05	.301472065772174	0	OUTLET
+
+[INFILTRATION]
+;;Subcatchment	Suction	Ksat	IMD
+Subcatch1	3.21001935059875	.762785746437354	.406512536098339
+
+[LID_CONTROLS]
+;;Name	Type	Parameters
+
+[LID_USAGE]
+;;Subcatchment	LID_Process	Number	Area	Width	InitSat	FromImp	ToPerv	RptFile	DrainTo
+
+[OUTFALLS]
+;;Name	Elevation	Type	Gated	Route_To
+Outfall1	0	FREE	NO		
+
+[TIMESERIES]
+;;Name		Date		Time		Value
+010010201001_EVAP FILE /home/matas/Desktop/CPRHD_WNV_USA_SWMM/data/input_file_data/evaporation_data_timeseries/010010201001_EVAP.txt
+
+[REPORT]
+;;Reporting Options
+INPUT	YES
+CONTROLS	NO
+SUBCATCHMENTS	ALL
+NODES	NONE
+LINKS	NONE
+
+
