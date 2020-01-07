@@ -1,0 +1,125 @@
+
+  EPA STORM WATER MANAGEMENT MODEL - VERSION 5.1 (Build 5.3.0.dev0)
+  --------------------------------------------------------------
+
+  
+  *************
+  Element Count
+  *************
+  Number of rain gages ...... 1
+  Number of subcatchments ... 1
+  Number of nodes ........... 1
+  Number of links ........... 0
+  Number of pollutants ...... 0
+  Number of land uses ....... 0
+  
+  
+  ****************
+  Raingage Summary
+  ****************
+                                                      Data       Recording
+  Name                 Data Source                    Type       Interval 
+  ------------------------------------------------------------------------
+  RainGage2            /home/matas/Desktop/CPRHD_WNV_USA_SWMM/data/input_file_data/weather_data_swmm_format/P_425566.txt
+  
+  
+  ********************
+  Subcatchment Summary
+  ********************
+  Name                       Area     Width   %Imperv    %Slope Rain Gage            Outlet              
+  -----------------------------------------------------------------------------------------------------------
+  Subcatch1                445.23 129295.89     13.35    9.1160 RainGage2            Outfall1            
+
+
+  *******************
+  LID Control Summary
+  *******************
+                                   No. of        Unit        Unit      % Area    % Imperv      % Perv
+  Subcatchment     LID Control      Units        Area       Width     Covered     Treated     Treated
+  ---------------------------------------------------------------------------------------------------
+  Subcatch1        RainGarden           1   504195.81        0.00        2.60      100.00        0.00
+  
+  
+  ************
+  Node Summary
+  ************
+                                           Invert      Max.    Ponded    External
+  Name                 Type                 Elev.     Depth      Area    Inflow  
+  -------------------------------------------------------------------------------
+  Outfall1             OUTFALL               0.00      0.00       0.0
+  
+  
+  
+  *********************
+  Rainfall File Summary
+  *********************
+  Station    First        Last         Recording   Periods    Periods    Periods
+  ID         Date         Date         Frequency  w/Precip    Missing    Malfunc.
+  -------------------------------------------------------------------------------
+  P_425566   01/01/1981   12/31/2014    1440 min     12418          0          0
+
+  
+  *********************************************************
+  NOTE: The summary statistics displayed in this report are
+  based on results found at every computational time step,  
+  not just on results from each reporting time step.
+  *********************************************************
+  
+  ****************
+  Analysis Options
+  ****************
+  Flow Units ............... CFS
+  Process Models:
+    Rainfall/Runoff ........ YES
+    RDII ................... NO
+    Snowmelt ............... NO
+    Groundwater ............ NO
+    Flow Routing ........... NO
+    Water Quality .......... NO
+  Infiltration Method ...... GREEN_AMPT
+  Starting Date ............ 01/01/1981 00:00:00
+  Ending Date .............. 12/31/2014 23:59:59
+  Antecedent Dry Days ...... 0.0
+  Report Time Step ......... 12:00:00
+  Wet Time Step ............ 00:06:00
+  Dry Time Step ............ 00:06:00
+  
+  
+  **************************        Volume         Depth
+  Runoff Quantity Continuity     acre-feet        inches
+  **************************     ---------       -------
+  Initial LID Storage ......         1.157         0.031
+  Total Precipitation ......     66414.172      1790.004
+  Evaporation Loss .........      1267.437        34.160
+  Infiltration Loss ........     65133.070      1755.475
+  Surface Runoff ...........         6.234         0.168
+  Final Storage ............         3.709         0.100
+  Continuity Error (%) .....         0.007
+  
+  
+  ***************************
+  Subcatchment Runoff Summary
+  ***************************
+  
+  ------------------------------------------------------------------------------------------------------------------------------
+                            Total      Total      Total      Total     Imperv       Perv      Total       Total     Peak  Runoff
+                           Precip      Runon       Evap      Infil     Runoff     Runoff     Runoff      Runoff   Runoff   Coeff
+  Subcatchment                 in         in         in         in         in         in         in    10^6 gal      CFS
+  ------------------------------------------------------------------------------------------------------------------------------
+  Subcatch1               1790.00       0.00      34.16    1755.48     220.89       0.00       0.17        2.03     5.97   0.000
+  
+
+  ***********************
+  LID Performance Summary
+  ***********************
+
+  --------------------------------------------------------------------------------------------------------------------
+                                         Total      Evap     Infil   Surface    Drain    Initial     Final  Continuity
+                                        Inflow      Loss      Loss   Outflow   Outflow   Storage   Storage       Error
+  Subcatchment      LID Control             in        in        in        in        in        in        in           %
+  --------------------------------------------------------------------------------------------------------------------
+  Subcatch1         RainGarden        10286.99    865.74   9412.14      6.46      0.00      1.20      3.85       -0.00
+
+  Analysis begun on:  Tue Jan  7 12:03:01 2020
+  Analysis ended on:  Tue Jan  7 12:03:05 2020
+  Total elapsed time: 00:00:04
