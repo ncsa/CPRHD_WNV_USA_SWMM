@@ -1,0 +1,9 @@
+The all_touched option is typically used for rasterization when the raster pixel size is close to the shapefile's polygon size, but the land cover pixels have 30m resolution, which is very small compared to the county sizes.
+
+Therefore, I suggest to use the all_touched=False data-set, as described below.
+
+1. NLCD_Urban_Counties: This contains the raw data created by zonal_stats
+2. NLCD_Urban_Counties_keyed: Raw data but the columns are converted based on the Land Cover Key (ex. 11 --> Open Water)
+3. **NLCD_Urban_Counties_keyed_percentage: Keyed data but the pixel counts have been converted to percentages**
+
+The last one is probably the one we want to use since it is easy to interpret.
